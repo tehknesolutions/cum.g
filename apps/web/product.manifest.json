@@ -1,0 +1,10 @@
+{
+  "brand": "CUM.G",
+  "release": "CUM.G V0.1 — EDUCATION VERTICAL SLICE",
+  "priority": "education",
+  "flow": ["landing", "assessment", "p01-l01", "p01-l02", "control-map", "hnk-performance-lab", "offer", "checkout", "dashboard"],
+  "boundaries": {
+    "privateVaultInGenericAnalytics": false,
+    "medicalSafetyBehindPaywall": false
+  }
+}
