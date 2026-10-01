@@ -1,0 +1,9 @@
+{
+  "id": "CUMG-P01",
+  "title": "Controle Ejaculatório",
+  "status": "PILOT",
+  "provenanceClasses": ["SCIENTIFIC", "EXPERIENTIAL", "SOCIAL", "HNK"],
+  "medicalSafetyBehindPaywall": false,
+  "verticalSliceLessons": ["L01", "L02"],
+  "instruments": ["CONTROL_MAP_V1", "HNK_PERFORMANCE_LAB_V01"]
+}
