@@ -55,3 +55,6 @@ P01 becomes runtime-verified only after the PENDING database and executable-suit
 - [x] CI workflow is configured to execute full Node test discovery on GitHub with Node 22.
 - [x] CI workflow includes a focused P01 database/web test pass.
 - [x] FREE journey now requires L01 → L02 → reflection/map update before NEXT_STEP.
+
+- [x] Recommendation now enters an executable practice runtime before OFFER.
+- [x] P01 E2E covers START_PRACTICE → COMPLETE_PRACTICE → OFFER.
