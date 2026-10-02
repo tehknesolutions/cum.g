@@ -5,52 +5,21 @@ import { createPostgresJourneyCheckpoint } from '../../packages/vault/src/postgr
 
 function memoryPostgres(){
   const rows=[];
-  return {
-    rows,
-    query:async(sql,params)=>{
-      if(/^INSERT INTO cumg_vault\.journey_checkpoints/i.test(sql)){const row={id:params[0],user_id:params[1],encrypted_state:params[2],state_version:params[3],created_at:`t-${rows.length+1}`};rows.push(row);return {rows:[row]};}
-      if(/FROM cumg_vault\.journey_checkpoints/i.test(sql)){const userId=params[0];const latest=rows.filter(row=>row.user_id===userId).sort((a,b)=>b.created_at.localeCompare(a.created_at))[0];return {rows:latest?[latest]:[]};}
-      throw new Error('UNEXPECTED_SQL');
+  return { rows, query:async(sql,params)=>{
+    if(/^INSERT INTO cumg_vault\.journey_checkpoints/i.test(sql)){
+      const latest=rows.filter(row=>row.user_id===params[1]).reduce((max,row)=>Math.max(max,row.state_version),0);
+      if(latest!==params[4]) return {rows:[]};
+      const row={id:params[0],user_id:params[1],encrypted_state:params[2],state_version:params[3],created_at:`t-${rows.length+1}`};rows.push(row);return {rows:[row]};
     }
-  };
+    if(/FROM cumg_vault\.journey_checkpoints/i.test(sql)){const userId=params[0];const latest=rows.filter(row=>row.user_id===userId).sort((a,b)=>b.state_version-a.state_version)[0];return {rows:latest?[latest]:[]};}
+    throw new Error('UNEXPECTED_SQL');
+  }};
 }
 
-const deps=(checkpoint)=>({
-  consentGate:(input)=>input?.allowed?{allowed:true}:{allowed:false,reason:'CONSENT_REQUIRED'},
-  assessment:{start:()=>({status:'IN_PROGRESS',assessmentId:'a1',instrumentVersion:'1.0.0',answers:{}}),answer:(state,input)=>({...state,answers:{...state.answers,[input.code]:input.value},status:input.complete?'COMPLETE':'IN_PROGRESS'})},
-  controlMap:{build:()=>({status:'COMPLETE',version:1,dimensions:{bodyAwareness:{value:50}}})},
-  lesson:{create:()=>({status:'IN_PROGRESS',currentStage:'LEARN'}),advance:(state,input)=>input.final?{...state,status:'COMPLETE'}:{...state,currentStage:input.nextStage}},
-  safety:{evaluate:()=>({escalated:false})},recommendation:{next:()=>({kind:'EXERCISE',targetId:'P01-PRACTICE-02'})},entitlement:{evaluate:()=>({allowed:false,reason:'PREMIUM_REQUIRED'})},analytics:()=>{},practiceRuntime:{create:()=>({status:'READY',start:()=>({status:'IN_PROGRESS'}),complete:()=>({status:'COMPLETE'})})},controlMapHistory:{saveSnapshot:async()=>({id:'map-1'}),loadLatestSnapshot:async()=>null},journeyCheckpoint:checkpoint
-});
+const deps=(checkpoint)=>({consentGate:(input)=>input?.allowed?{allowed:true}:{allowed:false,reason:'CONSENT_REQUIRED'},assessment:{start:()=>({status:'IN_PROGRESS',assessmentId:'a1',instrumentVersion:'1.0.0',answers:{}}),answer:(state,input)=>({...state,answers:{...state.answers,[input.code]:input.value},status:input.complete?'COMPLETE':'IN_PROGRESS'})},controlMap:{build:()=>({status:'COMPLETE',version:1,dimensions:{bodyAwareness:{value:50}}})},lesson:{create:()=>({status:'IN_PROGRESS',currentStage:'LEARN'}),advance:(state,input)=>input.final?{...state,status:'COMPLETE'}:{...state,currentStage:input.nextStage}},safety:{evaluate:()=>({escalated:false})},recommendation:{next:()=>({kind:'EXERCISE',targetId:'P01-PRACTICE-02'})},entitlement:{evaluate:()=>({allowed:false,reason:'PREMIUM_REQUIRED'})},analytics:()=>{},practiceRuntime:{create:()=>({status:'READY',start:()=>({status:'IN_PROGRESS'}),complete:()=>({status:'COMPLETE'})})},controlMapHistory:{saveSnapshot:async()=>({id:'map-1'}),loadLatestSnapshot:async()=>null},journeyCheckpoint:checkpoint});
 
-test('cross-session resume recovers exact checkpoint through postgres adapter',async()=>{
-  const db=memoryPostgres();
-  const checkpoint=createPostgresJourneyCheckpoint({createId:()=>`c-${db.rows.length+1}`,encrypt:async state=>JSON.stringify(state),decrypt:async cipher=>JSON.parse(cipher),query:db.query});
-  const first=createP01FreeJourney(deps(checkpoint));
-  await first.dispatch({type:'CONFIRM_ADULT_CONSENT',input:{allowed:true}});
-  await first.dispatch({type:'START_ASSESSMENT',userId:'user-a'});
-  const answer=await first.dispatch({type:'ANSWER_ASSESSMENT',input:{code:'P01Q01',value:4},userId:'user-a'});
-  assert.equal(answer.phase,'ASSESSMENT');
-  const second=createP01FreeJourney(deps(checkpoint));
-  const recovered=await second.dispatch({type:'BOOTSTRAP_SESSION',userId:'user-a'});
-  assert.equal(recovered.phase,'ASSESSMENT');
-  assert.deepEqual(recovered.assessmentState,{status:'IN_PROGRESS',assessmentId:'a1',instrumentVersion:'1.0.0',answers:{P01Q01:4}});
-  assert.equal(recovered.offerVisible,false);
-});
+test('cross-session resume recovers exact checkpoint through postgres adapter',async()=>{const db=memoryPostgres();const checkpoint=createPostgresJourneyCheckpoint({createId:()=>`c-${db.rows.length+1}`,encrypt:async state=>JSON.stringify(state),decrypt:async cipher=>JSON.parse(cipher),query:db.query});const first=createP01FreeJourney(deps(checkpoint));await first.dispatch({type:'CONFIRM_ADULT_CONSENT',input:{allowed:true}});await first.dispatch({type:'START_ASSESSMENT',userId:'user-a'});const answer=await first.dispatch({type:'ANSWER_ASSESSMENT',input:{code:'P01Q01',value:4},userId:'user-a'});assert.equal(answer.phase,'ASSESSMENT');const second=createP01FreeJourney(deps(checkpoint));const recovered=await second.dispatch({type:'BOOTSTRAP_SESSION',userId:'user-a'});assert.equal(recovered.phase,'ASSESSMENT');assert.deepEqual(recovered.assessmentState,{status:'IN_PROGRESS',assessmentId:'a1',instrumentVersion:'1.0.0',answers:{P01Q01:4}});assert.equal(recovered.offerVisible,false);});
 
-test('postgres checkpoint isolation prevents user A from resuming user B state',async()=>{
-  const db=memoryPostgres();
-  const checkpoint=createPostgresJourneyCheckpoint({createId:()=>`c-${db.rows.length+1}`,encrypt:async state=>JSON.stringify(state),decrypt:async cipher=>JSON.parse(cipher),query:db.query});
-  const first=createP01FreeJourney(deps(checkpoint));
-  await first.dispatch({type:'CONFIRM_ADULT_CONSENT',input:{allowed:true}});
-  await first.dispatch({type:'START_ASSESSMENT',userId:'user-a'});
-  const second=createP01FreeJourney(deps(checkpoint));
-  await second.dispatch({type:'CONFIRM_ADULT_CONSENT',input:{allowed:true}});
-  await second.dispatch({type:'START_ASSESSMENT',userId:'user-b'});
-  const resumed=createP01FreeJourney(deps(checkpoint));
-  const state=await resumed.dispatch({type:'BOOTSTRAP_SESSION',userId:'user-a'});
-  assert.equal(state.phase,'ASSESSMENT');
-  assert.equal(state.assessmentState.assessmentId,'a1');
-  assert.equal(db.rows.filter(row=>row.user_id==='user-a').length,1);
-  assert.equal(db.rows.filter(row=>row.user_id==='user-b').length,1);
-});
+test('postgres checkpoint isolation prevents user A from resuming user B state',async()=>{const db=memoryPostgres();const checkpoint=createPostgresJourneyCheckpoint({createId:()=>`c-${db.rows.length+1}`,encrypt:async state=>JSON.stringify(state),decrypt:async cipher=>JSON.parse(cipher),query:db.query});const first=createP01FreeJourney(deps(checkpoint));await first.dispatch({type:'CONFIRM_ADULT_CONSENT',input:{allowed:true}});await first.dispatch({type:'START_ASSESSMENT',userId:'user-a'});const second=createP01FreeJourney(deps(checkpoint));await second.dispatch({type:'CONFIRM_ADULT_CONSENT',input:{allowed:true}});await second.dispatch({type:'START_ASSESSMENT',userId:'user-b'});const resumed=createP01FreeJourney(deps(checkpoint));const state=await resumed.dispatch({type:'BOOTSTRAP_SESSION',userId:'user-a'});assert.equal(state.phase,'ASSESSMENT');assert.equal(state.assessmentState.assessmentId,'a1');assert.equal(db.rows.filter(row=>row.user_id==='user-a').length,1);assert.equal(db.rows.filter(row=>row.user_id==='user-b').length,1);});
+
+test('stale session cannot overwrite a newer checkpoint and fails closed',async()=>{const db=memoryPostgres();const checkpoint=createPostgresJourneyCheckpoint({createId:()=>`c-${db.rows.length+1}`,encrypt:async state=>JSON.stringify(state),decrypt:async cipher=>JSON.parse(cipher),query:db.query});const first=createP01FreeJourney(deps(checkpoint));await first.dispatch({type:'CONFIRM_ADULT_CONSENT',input:{allowed:true}});await first.dispatch({type:'START_ASSESSMENT',userId:'user-a'});const stale=createP01FreeJourney(deps(checkpoint));await stale.dispatch({type:'BOOTSTRAP_SESSION',userId:'user-a'});await first.dispatch({type:'ANSWER_ASSESSMENT',input:{code:'P01Q01',value:4},userId:'user-a'});const state=await stale.dispatch({type:'ANSWER_ASSESSMENT',input:{code:'P01Q01',value:2},userId:'user-a'});assert.equal(state.phase,'ERROR');assert.equal(state.error,'CHECKPOINT_CONFLICT');assert.equal(state.offerVisible,false);assert.equal(db.rows.at(-1).state_version,2);});
