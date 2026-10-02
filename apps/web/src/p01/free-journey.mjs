@@ -1,12 +1,8 @@
 export function createP01FreeJourney(deps = {}) {
   const { consentGate, assessment, controlMap, lesson, safety, recommendation, entitlement, practiceRuntime, controlMapHistory, analytics } = deps;
-  if (!consentGate || !assessment || !controlMap || !lesson || !safety || !recommendation || !entitlement || !practiceRuntime || !controlMapHistory?.saveSnapshot) throw new Error('P01_DEPENDENCIES_REQUIRED');
+  if (!consentGate || !assessment || !controlMap || !lesson || !safety || !recommendation || !entitlement || !practiceRuntime || !controlMapHistory?.saveSnapshot || !controlMapHistory?.loadLatestSnapshot) throw new Error('P01_DEPENDENCIES_REQUIRED');
 
-  let state = {
-    phase:'ENTRY', assessmentState:null, controlMap:null, lessonState:null, currentLessonCode:null,
-    completedLessons:[], reflections:[], nextStep:null, safetyGuidance:null, offerVisible:false,
-    offerAccess:null, practiceState:null, mapHistory:[], freeValueDelivered:false, error:null,
-  };
+  let state = { phase:'ENTRY', assessmentState:null, controlMap:null, lessonState:null, currentLessonCode:null, completedLessons:[], reflections:[], nextStep:null, safetyGuidance:null, offerVisible:false, offerAccess:null, practiceState:null, mapHistory:[], freeValueDelivered:false, error:null };
   const emit=(name,input)=>analytics?.(name,input);
   const requirePhase=(phase)=>{ if(state.phase!==phase) throw new Error(`INVALID_P01_PHASE:${phase}`); };
 
@@ -15,6 +11,7 @@ export function createP01FreeJourney(deps = {}) {
     async dispatch(event={}) {
       try {
         switch(event.type) {
+          case 'BOOTSTRAP_SESSION': { requirePhase('ENTRY'); if(!event.userId) throw new Error('USER_ID_REQUIRED'); const latest=await controlMapHistory.loadLatestSnapshot({userId:event.userId}); if(!latest) break; if(!latest.map || latest.map.status!=='COMPLETE') throw new Error('INVALID_RECOVERED_MAP'); state={...state,controlMap:latest.map,freeValueDelivered:true,mapHistory:[{version:latest.version??latest.map.version??1,status:'RECOVERED',id:latest.id??null}],phase:'NEXT_STEP',offerVisible:false,error:null}; emit('control_map_recovered',{version:latest.version??latest.map.version??1}); break; }
           case 'CONFIRM_ADULT_CONSENT': { requirePhase('ENTRY'); const decision=consentGate(event.input); if(!decision.allowed){state={...state,phase:'BLOCKED',error:decision.reason};break;} state={...state,phase:'ASSESSMENT',error:null}; emit('assessment_started',{assessmentId:'CUMG-P01-CONTROL-MAP',instrumentVersion:event.instrument?.version??'1.0.0'}); break; }
           case 'START_ASSESSMENT': requirePhase('ASSESSMENT'); state={...state,assessmentState:assessment.start(event.input)}; break;
           case 'ANSWER_ASSESSMENT': requirePhase('ASSESSMENT'); state={...state,assessmentState:assessment.answer(state.assessmentState,event.input)}; if(state.assessmentState.status==='COMPLETE'){state={...state,phase:'CONTROL_MAP'};emit('assessment_completed',{assessmentId:state.assessmentState.instrumentCode,instrumentVersion:state.assessmentState.instrumentVersion});} break;
@@ -33,7 +30,7 @@ export function createP01FreeJourney(deps = {}) {
           case 'VIEW_OFFER': { if(state.phase!=='OFFER'){if(state.phase==='SAFETY_GUIDANCE') break; throw new Error('INVALID_P01_PHASE:OFFER');} const access=entitlement.evaluate({...event.entitlementInput,safetyDecision:state.safetyGuidance}); state={...state,offerVisible:access.allowed||event.showOffer===true,offerAccess:access}; break; }
           default: throw new Error('UNKNOWN_P01_EVENT');
         }
-      } catch(error) { state={...state,phase:'ERROR',error:error instanceof Error?error.message:String(error)}; }
+      } catch(error) { state={...state,phase:'ERROR',offerVisible:false,error:error instanceof Error?error.message:String(error)}; }
       return this.getState();
     }
   };
