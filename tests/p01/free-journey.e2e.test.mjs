@@ -39,8 +39,13 @@ test('adult synthetic user completes FREE journey and receives value before offe
   assert.equal(state.freeValueDelivered,true);
   j.dispatch({type:'START_PRACTICE'});
   const completed=j.dispatch({type:'COMPLETE_PRACTICE',input:{completedSteps:3,reflectionRecorded:true}});
-  assert.equal(completed.phase,'OFFER');
-  assert.equal(completed.offerVisible,true);
+  assert.equal(completed.phase,'PRACTICE_RESULT');
+  assert.equal(completed.offerVisible,false);
+  const recorded=j.dispatch({type:'SAVE_PRACTICE_RESULT',privateRecord:{kind:'PRACTICE_RESULT'}});
+  assert.equal(recorded.phase,'MAP_UPDATE');
+  const offered=j.dispatch({type:'UPDATE_PRACTICE_MAP',controlMap:{status:'COMPLETE',dimensions:{}}});
+  assert.equal(offered.phase,'OFFER');
+  assert.equal(offered.offerVisible,true);
   assert.equal(state.offerVisible,true);
 });
 
