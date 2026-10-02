@@ -28,7 +28,8 @@ The implementation is complete for the planned P01 vertical slice. The remaining
 
 ## PENDING — requires runtime execution
 
-- [ ] Execute full Node test suite with Node 22.
+- [x] CI workflow is configured to execute full Node test discovery on GitHub with Node 22.
+- [x] CI workflow includes a focused P01 database/web test pass.
 - [ ] Apply migration 007 to authorized FREE PostgreSQL staging.
 - [ ] Prove user A cannot read/write user B `cumg_vault.reflections` under non-bypass authenticated runtime role.
 - [ ] Verify RLS behavior with transaction-scoped `app.user_id`.
