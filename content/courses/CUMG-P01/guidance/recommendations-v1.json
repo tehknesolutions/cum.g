@@ -1,0 +1,8 @@
+{
+  "code":"CUMG-P01-RECOMMENDATIONS",
+  "version":"1.0.0",
+  "rules":[
+    {"id":"NEXT-CONTROL-MAP","when":{"lessonComplete":false},"kind":"LESSON","targetId":"P01-L01","explanationKey":"P01.NEXT.COMPLETE_L01"},
+    {"id":"NEXT-PROGRESSIVE","when":{"lessonComplete":true},"kind":"EXERCISE","targetId":"P01-PRACTICE-02","explanationKey":"P01.NEXT.PROGRESSIVE_PRACTICE"}
+  ]
+}
