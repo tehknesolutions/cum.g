@@ -1,9 +1,10 @@
 {
   "code":"CUMG-P01-CLAIMS",
-  "version":"1.0.0",
+  "version":"1.1.0",
   "claims":[
     {"id":"P01-CLAIM-RESPONSE-VARIABILITY","class":"SCIENTIFIC","status":"REFERENCE_REQUIRED","sourceRefs":[],"note":"Claim requires approved source reference before publication."},
     {"id":"P01-CLAIM-SELF-REPORT-CONTEXT","class":"SCIENTIFIC","status":"REFERENCE_REQUIRED","sourceRefs":[],"note":"Claim requires approved source reference before publication."},
-    {"id":"P01-CLAIM-EDUCATION-NOT-DIAGNOSIS","class":"SCIENTIFIC","status":"REFERENCE_REQUIRED","sourceRefs":[],"note":"Boundary claim requires approved source reference before publication."}
+    {"id":"P01-CLAIM-EDUCATION-NOT-DIAGNOSIS","class":"SCIENTIFIC","status":"REFERENCE_REQUIRED","sourceRefs":[],"note":"Boundary claim requires approved source reference before publication."},
+    {"id":"P01-CLAIM-CONTEXTUAL-PATTERNS","class":"SCIENTIFIC","status":"REFERENCE_REQUIRED","sourceRefs":[],"note":"Contextual-pattern claim requires approved source reference before publication."}
   ]
 }
