@@ -58,3 +58,6 @@ P01 becomes runtime-verified only after the PENDING database and executable-suit
 
 - [x] Recommendation now enters an executable practice runtime before OFFER.
 - [x] P01 E2E covers START_PRACTICE → COMPLETE_PRACTICE → OFFER.
+
+- [x] Practice completion now enters PRACTICE_RESULT and requires private reflection + MAP_UPDATE before OFFER.
+- [x] Private reflection vault adapter contract is defined against the existing cumg_vault.reflections boundary.
