@@ -79,3 +79,21 @@ export function buildControlMap({ instrument, assessmentState, answers } = {}) {
     invalidQuestionCodes: [],
   };
 }
+
+export function updateControlMap({ previousMap, dimension, selfRating } = {}) {
+  if (!previousMap || previousMap.status !== 'COMPLETE' || !previousMap.dimensions) throw new Error('CONTROL_MAP_REQUIRED');
+  if (!Object.hasOwn(previousMap.dimensions, dimension)) throw new Error('DIMENSION_REQUIRED');
+  const rating = Number(selfRating);
+  if (!Number.isFinite(rating) || rating < 0 || rating > 100) throw new Error('SELF_RATING_OUT_OF_RANGE');
+  const current = previousMap.dimensions[dimension].value;
+  const value = Math.round((current * 80 + rating * 20) / 100);
+  return {
+    ...previousMap,
+    version: (previousMap.version ?? 1) + 1,
+    dimensions: {
+      ...previousMap.dimensions,
+      [dimension]: { ...previousMap.dimensions[dimension], value, interpretationKey: interpretationKey(dimension, value) }
+    },
+    updateSource: 'PRACTICE_FEEDBACK'
+  };
+}
