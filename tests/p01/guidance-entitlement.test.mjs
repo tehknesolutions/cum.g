@@ -14,6 +14,7 @@ test('safety guidance is deterministic and overrides a premium decision',()=>{
 
 test('FREE resources remain accessible without entitlement when no safety gate is active',()=>{
   assert.deepEqual(evaluateEntitlement({productId:'CUMG-P01',resourceTier:'FREE',entitlements:[],safetyDecision:{escalated:false}}),{allowed:true,reason:'FREE_ACCESS'});
+  assert.deepEqual(evaluateEntitlement({productId:'CUMG-P01',resourceTier:'PREMIUM',entitlements:[{productId:'CUMG-P01',active:true}]}),{allowed:false,reason:'SAFETY_CHECK_REQUIRED'});
 });
 
 test('recommendation is explainable and consent/version gated',()=>{
