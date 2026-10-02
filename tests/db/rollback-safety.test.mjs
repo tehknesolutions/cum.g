@@ -67,3 +67,18 @@ test('P01 seed is re-runnable by conflict-safe inserts', async()=>{
   const sql=await readFile(new URL('../../packages/db/migrations/006_seed_p01.sql',import.meta.url),'utf8');
   assert.equal((sql.match(/on conflict \\(id\\) do nothing/gi)||[]).length,3);
 });
+
+test('control map history migration enforces per-user version uniqueness and immutability',async()=>{
+  const sql=await readFile(new URL('../../packages/db/migrations/008_control_map_history.sql',import.meta.url),'utf8');
+  assert.match(sql,/create unique index if not exists control_maps_user_version_idx/i);
+  assert.match(sql,/prevent_control_map_history_update/i);
+  assert.match(sql,/control_map_history_immutable/i);
+  assert.match(sql,/before update on cumg_vault\.control_maps/i);
+});
+
+test('control map history rollback removes trigger and function before schema field',async()=>{
+  const sql=await readFile(new URL('../../packages/db/rollback/008_control_map_history.down.sql',import.meta.url),'utf8');
+  assert.match(sql,/drop trigger if exists control_map_history_immutable/i);
+  assert.match(sql,/drop function if exists cumg_vault\.prevent_control_map_history_update/i);
+  assert.match(sql,/drop column if exists map_version/i);
+});
