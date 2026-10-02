@@ -27,7 +27,11 @@ test('adult synthetic user completes FREE journey and receives value before offe
   j.dispatch({type:'BUILD_CONTROL_MAP'});
   j.dispatch({type:'START_L01',lesson:{}});
   j.dispatch({type:'ADVANCE_L01',input:{final:true}});
-  j.dispatch({type:'SAVE_REFLECTION',privateRecord:{kind:'P01_REFLECTION'}});
+  j.dispatch({type:'SAVE_REFLECTION',privateRecord:{kind:'P01_REFLECTION_L01'}});
+  j.dispatch({type:'UPDATE_MAP',controlMap:{status:'COMPLETE',dimensions:{}}});
+  j.dispatch({type:'START_L02',lesson:{lessonCode:'P01-L02'}});
+  j.dispatch({type:'ADVANCE_L02',input:{final:true}});
+  j.dispatch({type:'SAVE_REFLECTION',privateRecord:{kind:'P01_REFLECTION_L02'}});
   j.dispatch({type:'UPDATE_MAP',controlMap:{status:'COMPLETE',dimensions:{}}});
   const state=j.dispatch({type:'RESOLVE_NEXT_STEP',recommendationInput:{},safetyInput:{}});
   assert.equal(state.phase,'OFFER');
@@ -43,7 +47,11 @@ test('safety escalation wins over premium offer and remains authoritative',()=>{
   j.dispatch({type:'BUILD_CONTROL_MAP'});
   j.dispatch({type:'START_L01',lesson:{}});
   j.dispatch({type:'ADVANCE_L01',input:{final:true}});
-  j.dispatch({type:'SAVE_REFLECTION',privateRecord:{kind:'P01_REFLECTION'}});
+  j.dispatch({type:'SAVE_REFLECTION',privateRecord:{kind:'P01_REFLECTION_L01'}});
+  j.dispatch({type:'UPDATE_MAP',controlMap:{status:'COMPLETE',dimensions:{}}});
+  j.dispatch({type:'START_L02',lesson:{lessonCode:'P01-L02'}});
+  j.dispatch({type:'ADVANCE_L02',input:{final:true}});
+  j.dispatch({type:'SAVE_REFLECTION',privateRecord:{kind:'P01_REFLECTION_L02'}});
   j.dispatch({type:'UPDATE_MAP',controlMap:{status:'COMPLETE',dimensions:{}}});
   const state=j.dispatch({type:'RESOLVE_NEXT_STEP',safetyInput:{urgent:true}});
   assert.equal(state.phase,'SAFETY_GUIDANCE');
@@ -67,4 +75,20 @@ test('journey rejects out-of-order private reflection',()=>{
   const state=j.dispatch({type:'SAVE_REFLECTION',privateRecord:{kind:'P01_REFLECTION'}});
   assert.equal(state.phase,'ERROR');
   assert.match(state.error,/INVALID_P01_PHASE:REFLECTION/);
+});
+
+
+test('FREE journey requires L02 before resolving the next step',()=>{
+  const j=createP01FreeJourney(deps);
+  j.dispatch({type:'CONFIRM_ADULT_CONSENT',input:{allowed:true}});
+  j.dispatch({type:'START_ASSESSMENT'});
+  j.dispatch({type:'ANSWER_ASSESSMENT',input:{code:'P01Q01',value:4,complete:true}});
+  j.dispatch({type:'BUILD_CONTROL_MAP'});
+  j.dispatch({type:'START_L01',lesson:{lessonCode:'P01-L01'}});
+  j.dispatch({type:'ADVANCE_L01',input:{final:true}});
+  j.dispatch({type:'SAVE_REFLECTION',privateRecord:{kind:'P01_REFLECTION_L01'}});
+  j.dispatch({type:'UPDATE_MAP',controlMap:{status:'COMPLETE',dimensions:{}}});
+  const state=j.dispatch({type:'RESOLVE_NEXT_STEP',safetyInput:{}});
+  assert.equal(state.phase,'ERROR');
+  assert.match(state.error,/INVALID_P01_PHASE:NEXT_STEP/);
 });
