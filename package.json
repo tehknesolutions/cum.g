@@ -4,8 +4,9 @@
   "private": true,
   "packageManager": "pnpm@10.17.1",
   "scripts": {
-    "test": "node --test tests/*.test.mjs",
-    "check": "pnpm test"
+    "test": "node --test",
+    "check": "pnpm test",
+    "test:p01": "node --test tests/p01 tests/db"
   },
   "engines": {
     "node": ">=22"

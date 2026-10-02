@@ -1,0 +1,8 @@
+{
+  "code":"CUMG-P01-SAFETY",
+  "version":"1.0.0",
+  "rules":[
+    {"id":"SAFETY-PROFESSIONAL-CARE","signal":"PROFESSIONAL_CARE_INDICATED","guidanceKey":"P01.SAFETY.PROFESSIONAL_CARE","priority":100},
+    {"id":"SAFETY-URGENT","signal":"URGENT_CONCERN","guidanceKey":"P01.SAFETY.URGENT_CARE","priority":200}
+  ]
+}

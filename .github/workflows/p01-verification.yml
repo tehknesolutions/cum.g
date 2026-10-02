@@ -1,0 +1,26 @@
+name: P01 Verification
+
+on:
+  push:
+    branches: ["main", "feat/m5-g2-database-contracts"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  node-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run full test discovery
+        run: node --test
+      - name: Run P01 focused suite
+        run: node --test tests/p01 tests/db

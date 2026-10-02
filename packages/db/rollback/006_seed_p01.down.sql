@@ -1,0 +1,8 @@
+DELETE FROM learning.exercises WHERE id IN (
+  '30000000-0000-4000-8000-000000000001',
+  '30000000-0000-4000-8000-000000000002',
+  '30000000-0000-4000-8000-000000000003'
+);
+DELETE FROM learning.lessons WHERE lesson_code IN ('P01-L01', 'P01-L02', 'P01-L03');
+DELETE FROM learning.modules WHERE program_id = 'CUMG-P01';
+DELETE FROM learning.programs WHERE id = 'CUMG-P01';

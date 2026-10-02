@@ -1,0 +1,23 @@
+{
+  "code": "CUMG-P01-CONTROL-MAP",
+  "version": "1.0.0",
+  "maxAnswers": 32,
+  "coreQuestionCodes": ["P01Q01","P01Q02","P01Q03","P01Q04","P01Q05","P01Q06","P01Q07","P01Q08","P01Q09","P01Q10","P01Q11","P01Q12"],
+  "questions": [
+    {"code":"P01Q01","purpose":"body awareness baseline","dimension":"bodyAwareness","response":{"type":"scale","min":0,"max":4}},
+    {"code":"P01Q02","purpose":"body tension awareness","dimension":"bodyAwareness","response":{"type":"scale","min":0,"max":4}},
+    {"code":"P01Q03","purpose":"arousal change awareness","dimension":"arousalAwareness","response":{"type":"scale","min":0,"max":4}},
+    {"code":"P01Q04","purpose":"arousal escalation awareness","dimension":"arousalAwareness","response":{"type":"scale","min":0,"max":4},"branch":{"when":{"lte":1},"questionCode":"P01B01"}},
+    {"code":"P01Q05","purpose":"self regulation perception","dimension":"selfRegulation","response":{"type":"scale","min":0,"max":4}},
+    {"code":"P01Q06","purpose":"ability to pause and reset attention","dimension":"selfRegulation","response":{"type":"scale","min":0,"max":4}},
+    {"code":"P01Q07","purpose":"attention stability","dimension":"mentalAttention","response":{"type":"scale","min":0,"max":4}},
+    {"code":"P01Q08","purpose":"intrusive performance attention","dimension":"mentalAttention","response":{"type":"scale","min":0,"max":4},"branch":{"when":{"lte":1},"questionCode":"P01B02"}},
+    {"code":"P01Q09","purpose":"emotional response awareness","dimension":"emotionalResponse","response":{"type":"scale","min":0,"max":4}},
+    {"code":"P01Q10","purpose":"context and communication comfort","dimension":"contextCommunication","response":{"type":"scale","min":0,"max":4},"branch":{"when":{"lte":1},"questionCode":"P01B03"}},
+    {"code":"P01Q11","purpose":"perceived confidence baseline","dimension":"perceivedConfidence","response":{"type":"scale","min":0,"max":4}},
+    {"code":"P01Q12","purpose":"confidence across contexts","dimension":"perceivedConfidence","response":{"type":"scale","min":0,"max":4}},
+    {"code":"P01B01","purpose":"clarify low arousal awareness","dimension":"arousalAwareness","response":{"type":"scale","min":0,"max":4}},
+    {"code":"P01B02","purpose":"clarify attention pressure","dimension":"mentalAttention","response":{"type":"scale","min":0,"max":4}},
+    {"code":"P01B03","purpose":"clarify contextual communication","dimension":"contextCommunication","response":{"type":"scale","min":0,"max":4}}
+  ]
+}
