@@ -2,9 +2,11 @@
   "brand": "CUM.G",
   "release": "CUM.G V0.1 — EDUCATION VERTICAL SLICE",
   "priority": "education",
-  "flow": ["entry", "age-consent", "assessment", "control-map", "p01-l01", "reflection-map-update", "next-step", "offer"],
+  "flow": ["entry", "age-consent", "assessment", "control-map", "p01-l01", "reflection", "map-update", "p01-l02", "reflection", "map-update", "next-step", "practice", "practice-result", "map-update", "safety-guidance", "offer"],
   "boundaries": {
     "privateVaultInGenericAnalytics": false,
-    "medicalSafetyBehindPaywall": false
+    "medicalSafetyBehindPaywall": false,
+    "safetyGuidancePrecedesOffer": true,
+    "offerExcludedFromCheckpointPersistence": true
   }
 }
