@@ -25,7 +25,7 @@
 
 ## CURRENT GATE
 
-L01 is complete and L02 is now integrated as the next vertical-slice lesson; runtime verification remains pending. The remaining gate is executable/runtime evidence; no implementation work is being blocked by the lack of a local runner.
+L01 is complete and L02 is now integrated as the next vertical-slice lesson; runtime verification remains pending. The remaining gate is executable/runtime evidence; the FREE journey now requires L01 and L02 before the next-step/safety/offer gate.
 
 ## PENDING — requires runtime execution
 
@@ -54,3 +54,4 @@ P01 becomes runtime-verified only after the PENDING database and executable-suit
 
 - [x] CI workflow is configured to execute full Node test discovery on GitHub with Node 22.
 - [x] CI workflow includes a focused P01 database/web test pass.
+- [x] FREE journey now requires L01 → L02 → reflection/map update before NEXT_STEP.
