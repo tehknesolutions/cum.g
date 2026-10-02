@@ -61,3 +61,7 @@ P01 becomes runtime-verified only after the PENDING database and executable-suit
 
 - [x] Practice completion now enters PRACTICE_RESULT and requires private reflection + MAP_UPDATE before OFFER.
 - [x] Private reflection vault adapter contract is defined against the existing cumg_vault.reflections boundary.
+
+- [x] Vault isolation contract tests pin `FORCE ROW LEVEL SECURITY` and owner-only `control_maps` policy.
+- [x] Control Map history uses per-user `(user_id, map_version)` uniqueness as the concurrent-write conflict boundary.
+- [x] Immutable history contract tests cover owner/version/provenance/encrypted-payload rewrite rejection.
