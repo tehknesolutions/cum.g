@@ -1,0 +1,30 @@
+name: P01 Contract Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  p01-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Enable pnpm
+        run: corepack enable && corepack prepare pnpm@10.17.1 --activate
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: P01 contract tests
+        run: pnpm test:p01
+      - name: Full test suite
+        run: pnpm test
