@@ -9,13 +9,11 @@ import recommendations from '../../content/courses/CUMG-P01/guidance/recommendat
 test('safety guidance is deterministic and overrides a premium decision',()=>{
   const result=evaluateSafety({ruleSet:safety,privateSignals:{URGENT_CONCERN:true}});
   assert.deepEqual(result,{escalated:true,guidanceKey:'P01.SAFETY.URGENT_CARE',ruleId:'SAFETY-URGENT'});
-  const paywall=evaluateEntitlement({productId:'CUMG-P01',resourceTier:'PREMIUM',entitlements:[]});
-  assert.equal(paywall.allowed,false);
-  assert.equal(result.escalated,true);
+  assert.deepEqual(evaluateEntitlement({productId:'CUMG-P01',resourceTier:'PREMIUM',entitlements:[],safetyDecision:result}),{allowed:false,reason:'SAFETY_GATE'});
 });
 
-test('FREE resources remain accessible without entitlement',()=>{
-  assert.deepEqual(evaluateEntitlement({productId:'CUMG-P01',resourceTier:'FREE',entitlements:[]}),{allowed:true,reason:'FREE_ACCESS'});
+test('FREE resources remain accessible without entitlement when no safety gate is active',()=>{
+  assert.deepEqual(evaluateEntitlement({productId:'CUMG-P01',resourceTier:'FREE',entitlements:[],safetyDecision:{escalated:false}}),{allowed:true,reason:'FREE_ACCESS'});
 });
 
 test('recommendation is explainable and consent/version gated',()=>{
