@@ -1,5 +1,5 @@
 export function createP01FreeJourney(deps = {}) {
-  const { consentGate, assessment, controlMap, lesson, safety, recommendation, entitlement, practiceRuntime, analytics } = deps;
+  const { consentGate, assessment, controlMap, lesson, safety, recommendation, entitlement, practiceRuntime, controlMapHistory, analytics } = deps;
   if (!consentGate || !assessment || !controlMap || !lesson || !safety || !recommendation || !entitlement || !practiceRuntime) throw new Error('P01_DEPENDENCIES_REQUIRED');
 
   let state = {
@@ -15,6 +15,7 @@ export function createP01FreeJourney(deps = {}) {
     offerVisible: false,
     offerAccess: null,
     practiceState: null,
+    mapHistory: [],
     freeValueDelivered: false,
     error: null,
   };
@@ -53,7 +54,8 @@ export function createP01FreeJourney(deps = {}) {
             requirePhase('CONTROL_MAP');
             const map = controlMap.build(event.input);
             if (map.status !== 'COMPLETE') { state = { ...state, controlMap:map }; break; }
-            state = { ...state, controlMap:map, freeValueDelivered:true, phase:'L01' };
+            state = { ...state, controlMap:map, freeValueDelivered:true, mapHistory:[{version:map.version ?? 1, status:'PENDING'}], phase:'L01' };
+            if (controlMapHistory?.saveSnapshot) void controlMapHistory.saveSnapshot({ userId:event.userId, assessmentId:event.assessmentId ?? state.assessmentState?.assessmentId, instrumentVersion:state.assessmentState?.instrumentVersion ?? '1.0.0', map });
             break;
           }
           case 'START_L01':
@@ -115,7 +117,8 @@ export function createP01FreeJourney(deps = {}) {
             break;
           case 'UPDATE_PRACTICE_MAP':
             requirePhase('MAP_UPDATE');
-            state = { ...state, controlMap:event.controlMap, phase:'OFFER', offerVisible:true };
+            state = { ...state, controlMap:event.controlMap, mapHistory:[...state.mapHistory,{version:event.controlMap.version ?? 2,status:'PENDING'}], phase:'OFFER', offerVisible:true };
+            if (controlMapHistory?.saveSnapshot) void controlMapHistory.saveSnapshot({ userId:event.userId, assessmentId:event.assessmentId ?? state.assessmentState?.assessmentId, instrumentVersion:state.assessmentState?.instrumentVersion ?? '1.0.0', map:event.controlMap });
             break;
           case 'VIEW_OFFER': {
             if (state.phase !== 'OFFER') {
