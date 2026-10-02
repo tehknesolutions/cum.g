@@ -17,6 +17,7 @@ const deps = {
   recommendation: { next: () => ({kind:'EXERCISE',targetId:'P01-PRACTICE-02',ruleId:'NEXT-PROGRESSIVE',explanationKey:'P01.NEXT.PROGRESSIVE_PRACTICE'}) },
   entitlement: { evaluate: (input) => input?.safetyDecision?.escalated ? {allowed:false,reason:'SAFETY_GATE'} : {allowed:false,reason:'PREMIUM_REQUIRED'} },
   analytics: () => {},
+  practiceRuntime: { create: ({ recommendation }) => ({ status:'READY', start:()=>({status:'IN_PROGRESS'}), complete:()=>({status:'COMPLETE',targetId:recommendation.targetId}) }) },
 };
 
 test('adult synthetic user completes FREE journey and receives value before offer',()=>{
@@ -34,8 +35,12 @@ test('adult synthetic user completes FREE journey and receives value before offe
   j.dispatch({type:'SAVE_REFLECTION',privateRecord:{kind:'P01_REFLECTION_L02'}});
   j.dispatch({type:'UPDATE_MAP',controlMap:{status:'COMPLETE',dimensions:{}}});
   const state=j.dispatch({type:'RESOLVE_NEXT_STEP',recommendationInput:{},safetyInput:{}});
-  assert.equal(state.phase,'OFFER');
+  assert.equal(state.phase,'PRACTICE');
   assert.equal(state.freeValueDelivered,true);
+  j.dispatch({type:'START_PRACTICE'});
+  const completed=j.dispatch({type:'COMPLETE_PRACTICE',input:{completedSteps:3,reflectionRecorded:true}});
+  assert.equal(completed.phase,'OFFER');
+  assert.equal(completed.offerVisible,true);
   assert.equal(state.offerVisible,true);
 });
 
