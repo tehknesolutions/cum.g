@@ -3,7 +3,7 @@
 **Program:** CUMG-P01 — Controle Ejaculatório  
 **Scope:** V1 FREE educational vertical slice  
 **Branch:** main  
-**Status:** IMPLEMENTED / SAFETY-HARDENED / RUNTIME VERIFICATION PENDING WHERE ENVIRONMENT IS REQUIRED
+**Status:** IMPLEMENTED / SAFETY-HARDENED / WEB-INTEGRATED / RUNTIME VERIFICATION PENDING WHERE ENVIRONMENT IS REQUIRED
 
 ## PASS — static/contract implementation evidence
 
@@ -21,7 +21,12 @@
 - [x] Safety escalation is tested before practice and remains outside entitlement gating.
 - [x] Entitlement gate independently refuses PREMIUM when a safety escalation is present.
 - [x] FREE journey exposes meaningful Assessment + Control Map + L01/L02 value before offer.
-- [x] Course and product manifests now enumerate the complete FREE journey through practice/result/safety/offer.
+- [x] Course and product manifests enumerate the complete FREE journey through practice/result/safety/offer.
+- [x] Web surface is mobile-first and wired to the canonical P01 journey controller.
+- [x] Browser adapter consumes the canonical assessment, control-map, lesson, guidance and practice runtimes.
+- [x] Browser adapter loads versioned P01 content rather than duplicating question/lesson definitions.
+- [x] Browser checkpoint adapter preserves optimistic version conflicts in the presentation layer.
+- [x] Web surface does not use browser storage or transmit private reflection text.
 - [x] Analytics allowlist contains only coarse P01 lifecycle identifiers and recursively rejects sensitive/private keys.
 - [x] No real intimate/health fixtures are used by P01 tests.
 - [x] Resumable journey checkpoints are encrypted at the Vault adapter boundary.
@@ -33,7 +38,7 @@
 
 ## CURRENT GATE
 
-The P01 FREE journey contract is now aligned across the web product manifest, canonical course manifest, orchestration, safety/entitlement precedence, and resumable checkpoint policy. Runtime verification remains pending where PostgreSQL/staging or an executable runner is required.
+The P01 FREE journey is now represented consistently in the product manifest, canonical course manifest, orchestration, domain runtimes, browser presentation surface, safety/entitlement precedence, and resumable checkpoint policy. Runtime verification remains pending where PostgreSQL/staging or an executable runner is required.
 
 ## PENDING — requires runtime execution
 
@@ -71,6 +76,7 @@ P01 becomes runtime-verified only after the PENDING database and executable-suit
 - [x] P01 E2E covers START_PRACTICE → COMPLETE_PRACTICE → OFFER.
 - [x] Practice completion now enters PRACTICE_RESULT and requires private reflection + MAP_UPDATE before OFFER.
 - [x] Safety escalation precedes practice and offer in the executable orchestration contract.
+- [x] Browser presentation is driven by the same orchestration state machine rather than a parallel UI-only state machine.
 - [x] Private reflection vault adapter contract is defined against the existing cumg_vault.reflections boundary.
 - [x] Vault isolation contract tests pin `FORCE ROW LEVEL SECURITY` and owner-only `control_maps` policy.
 - [x] Control Map history uses per-user `(user_id, map_version)` uniqueness as the concurrent-write conflict boundary.
