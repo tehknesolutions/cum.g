@@ -6,6 +6,8 @@ const identity = new URL('../../packages/db/migrations/001_identity.sql', import
 const migration = new URL('../../packages/db/migrations/007_p01_vertical_slice.sql', import.meta.url);
 const rollback = new URL('../../packages/db/rollback/007_p01_vertical_slice.down.sql', import.meta.url);
 const learning = new URL('../../packages/db/migrations/003_learning.sql', import.meta.url);
+const manifestUrl = new URL('../../content/courses/CUMG-P01/course.json', import.meta.url);
+const productManifestUrl = new URL('../../apps/web/product.manifest.json', import.meta.url);
 
 test('P01 identity boundary combines baseline versioned consent with explicit adult confirmation', async () => {
   const baseline = (await readFile(identity, 'utf8')).toLowerCase();
@@ -28,9 +30,7 @@ test('private reflections remain opaque inside cumg_vault with forced RLS', asyn
 
 test('learning progress does not become an intimate reflection store', async () => {
   const sql = (await readFile(learning, 'utf8')).toLowerCase();
-  for (const forbidden of ['reflection', 'encrypted_payload', 'answer_payload', 'control_map_payload']) {
-    assert.equal(sql.includes(forbidden), false, `learning domain contains private field: ${forbidden}`);
-  }
+  for (const forbidden of ['reflection', 'encrypted_payload', 'answer_payload', 'control_map_payload']) assert.equal(sql.includes(forbidden), false, `learning domain contains private field: ${forbidden}`);
 });
 
 test('P01 rollback removes private reflection structure and only its identity addition', async () => {
@@ -38,4 +38,22 @@ test('P01 rollback removes private reflection structure and only its identity ad
   assert.match(sql, /drop table if exists cumg_vault\.reflections/);
   assert.match(sql, /drop column if exists age_18_confirmed/);
   assert.equal(sql.includes('drop column if exists policy_version'), false, 'baseline policy_version must survive P01 rollback');
+});
+
+test('P01 course manifest pins the complete FREE journey and resumable checkpoint policy', async () => {
+  const course = JSON.parse(await readFile(manifestUrl, 'utf8'));
+  assert.deepEqual(course.verticalSliceLessons, ['P01-L01', 'P01-L02']);
+  assert.deepEqual(course.freeJourney, ['AGE_CONSENT','ASSESSMENT','CONTROL_MAP','P01-L01','REFLECTION','MAP_UPDATE','P01-L02','REFLECTION','MAP_UPDATE','NEXT_STEP','PRACTICE','PRACTICE_RESULT','MAP_UPDATE','SAFETY_GUIDANCE','OFFER']);
+  assert.equal(course.checkpointPolicy.persistResumableStates, true);
+  assert.equal(course.checkpointPolicy.persistOfferState, false);
+  assert.equal(course.checkpointPolicy.optimisticVersioning, true);
+});
+
+test('product manifest keeps safety before offer and private state out of analytics', async () => {
+  const product = JSON.parse(await readFile(productManifestUrl, 'utf8'));
+  assert.equal(product.boundaries.privateVaultInGenericAnalytics, false);
+  assert.equal(product.boundaries.medicalSafetyBehindPaywall, false);
+  assert.equal(product.boundaries.safetyGuidancePrecedesOffer, true);
+  assert.equal(product.boundaries.offerExcludedFromCheckpointPersistence, true);
+  assert.ok(product.flow.indexOf('safety-guidance') < product.flow.indexOf('offer'));
 });
