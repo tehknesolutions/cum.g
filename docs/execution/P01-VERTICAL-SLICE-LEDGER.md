@@ -18,8 +18,10 @@
 - [x] Private reflection storage is under `cumg_vault` with FORCE RLS.
 - [x] Learning progress is not extended with private reflection payloads.
 - [x] Safety guidance is resolved before premium offer in the web journey.
+- [x] Safety escalation is tested before practice and remains outside entitlement gating.
 - [x] Entitlement gate independently refuses PREMIUM when a safety escalation is present.
-- [x] FREE journey exposes meaningful Control Map/L01 value before offer.
+- [x] FREE journey exposes meaningful Assessment + Control Map + L01/L02 value before offer.
+- [x] Course and product manifests now enumerate the complete FREE journey through practice/result/safety/offer.
 - [x] Analytics allowlist contains only coarse P01 lifecycle identifiers and recursively rejects sensitive/private keys.
 - [x] No real intimate/health fixtures are used by P01 tests.
 - [x] Resumable journey checkpoints are encrypted at the Vault adapter boundary.
@@ -31,7 +33,7 @@
 
 ## CURRENT GATE
 
-L01 and L02 are integrated into the FREE journey. Resumable session persistence is now statically/contractually complete, including cross-session recovery and stale-writer protection. Runtime verification remains pending where PostgreSQL/staging or an executable runner is required.
+The P01 FREE journey contract is now aligned across the web product manifest, canonical course manifest, orchestration, safety/entitlement precedence, and resumable checkpoint policy. Runtime verification remains pending where PostgreSQL/staging or an executable runner is required.
 
 ## PENDING — requires runtime execution
 
@@ -68,6 +70,7 @@ P01 becomes runtime-verified only after the PENDING database and executable-suit
 - [x] Recommendation now enters an executable practice runtime before OFFER.
 - [x] P01 E2E covers START_PRACTICE → COMPLETE_PRACTICE → OFFER.
 - [x] Practice completion now enters PRACTICE_RESULT and requires private reflection + MAP_UPDATE before OFFER.
+- [x] Safety escalation precedes practice and offer in the executable orchestration contract.
 - [x] Private reflection vault adapter contract is defined against the existing cumg_vault.reflections boundary.
 - [x] Vault isolation contract tests pin `FORCE ROW LEVEL SECURITY` and owner-only `control_maps` policy.
 - [x] Control Map history uses per-user `(user_id, map_version)` uniqueness as the concurrent-write conflict boundary.
@@ -75,3 +78,4 @@ P01 becomes runtime-verified only after the PENDING database and executable-suit
 - [x] Journey checkpoint persistence uses per-user `(user_id, state_version)` uniqueness as the concurrent-write conflict boundary.
 - [x] Journey checkpoint adapter uses `expectedVersion` and fails closed on stale writes.
 - [x] P01 orchestration carries checkpoint version state across resumable transitions.
+- [x] Course/product manifests pin checkpoint policy and safety-before-offer ordering.
