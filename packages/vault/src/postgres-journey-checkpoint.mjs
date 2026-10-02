@@ -11,19 +11,23 @@ export function createPostgresJourneyCheckpoint({ query, encrypt, decrypt, creat
   };
 
   return {
-    async save({ userId, state } = {}) {
+    async save({ userId, state, expectedVersion = 0 } = {}) {
       if (!userId) throw new Error('USER_ID_REQUIRED');
+      if (!Number.isInteger(expectedVersion) || expectedVersion < 0) throw new Error('INVALID_EXPECTED_CHECKPOINT_VERSION');
       const validState = safeState(state);
+      const nextVersion = expectedVersion + 1;
       const encryptedState = await encrypt(validState);
       const id = createId();
-      const sql = 'INSERT INTO cumg_vault.journey_checkpoints (id, user_id, encrypted_state, state_version) VALUES ($1, $2, $3, $4) RETURNING id, user_id, state_version, created_at';
-      const result = await query(sql, [id, userId, encryptedState, 1]);
-      return result?.rows?.[0] ?? null;
+      const sql = 'INSERT INTO cumg_vault.journey_checkpoints (id, user_id, encrypted_state, state_version) SELECT $1, $2, $3, $4 WHERE COALESCE((SELECT MAX(state_version) FROM cumg_vault.journey_checkpoints WHERE user_id = $2), 0) = $5 RETURNING id, user_id, state_version, created_at';
+      const result = await query(sql, [id, userId, encryptedState, nextVersion, expectedVersion]);
+      const row = result?.rows?.[0];
+      if (!row) throw new Error('CHECKPOINT_CONFLICT');
+      return row;
     },
 
     async loadLatest({ userId } = {}) {
       if (!userId) throw new Error('USER_ID_REQUIRED');
-      const sql = 'SELECT id, encrypted_state, state_version, created_at FROM cumg_vault.journey_checkpoints WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1';
+      const sql = 'SELECT id, encrypted_state, state_version, created_at FROM cumg_vault.journey_checkpoints WHERE user_id = $1 ORDER BY state_version DESC LIMIT 1';
       const result = await query(sql, [userId]);
       const row = result?.rows?.[0];
       if (!row) return null;
