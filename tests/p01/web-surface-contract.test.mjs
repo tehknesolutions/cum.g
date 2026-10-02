@@ -5,15 +5,21 @@ import { readFile } from 'node:fs/promises';
 const html=await readFile(new URL('../../apps/web/index.html',import.meta.url),'utf8');
 const css=await readFile(new URL('../../apps/web/styles.css',import.meta.url),'utf8');
 const js=await readFile(new URL('../../apps/web/app.mjs',import.meta.url),'utf8');
+const adapter=await readFile(new URL('../../apps/web/src/p01/browser-journey.mjs',import.meta.url),'utf8');
 
-test('P01 browser surface is mobile-first and wired to the journey module',()=>{
+test('P01 browser surface is mobile-first and wired to the canonical journey adapter',()=>{
  assert.match(html,/viewport/); assert.match(html,/app\.mjs/); assert.match(css,/@media\(max-width:600px\)/);
- assert.match(js,/Controle Ejaculatório/); assert.match(js,/age-consent/); assert.match(js,/control-map/); assert.match(js,/P01-L01/); assert.match(js,/P01-L02/); assert.match(js,/practice-result/); assert.match(js,/safety-guidance/); assert.match(js,/offer/);
+ assert.match(js,/createBrowserP01Journey/); assert.match(js,/CONFIRM_ADULT_CONSENT/); assert.match(js,/ANSWER_ASSESSMENT/); assert.match(js,/BUILD_CONTROL_MAP/); assert.match(js,/START_L01/); assert.match(js,/START_L02/); assert.match(js,/START_PRACTICE/); assert.match(js,/COMPLETE_PRACTICE/); assert.match(js,/VIEW_OFFER/);
 });
 
-test('P01 browser surface does not expose private reflection payloads or persist offer state',()=>{
- assert.match(js,/Reflexão privada/); assert.match(js,/Vault privado/); assert.match(js,/não coleta o texto/); assert.match(js,/não é transformada em dado genérico de analytics/); assert.match(js,/offer/);
- assert.doesNotMatch(js,/localStorage/); assert.doesNotMatch(js,/sessionStorage/); assert.doesNotMatch(js,/fetch\(/);
+test('P01 browser adapter uses canonical domain packages and versioned content',()=>{
+ for(const token of ['createP01FreeJourney','loadInstrument','startAssessment','answerQuestion','buildControlMap','loadLesson','createLessonSession','advanceLesson','evaluateSafety','recommendNextStep','createPracticeRuntime']) assert.match(adapter,new RegExp(token));
+ for(const path of ['control-map-v1.json','P01-L01.json','P01-L02.json','safety-v1.json','recommendations-v1.json']) assert.match(adapter,new RegExp(path.replaceAll('.','\\.')));
+ assert.match(adapter,/CHECKPOINT_CONFLICT/);
 });
 
-test('initial practice is explicitly non-sexual',()=>{ assert.match(js,/Prática inicial não sexual/); assert.match(js,/Sem forçar/); });
+test('P01 browser surface never uses browser storage or transmits private reflection text',()=>{
+ assert.doesNotMatch(js,/localStorage/); assert.doesNotMatch(js,/sessionStorage/); assert.doesNotMatch(js,/fetch\(/); assert.match(js,/REFLECTION_NOT_COLLECTED/); assert.match(js,/PRACTICE_RESULT_NOT_COLLECTED/);
+});
+
+test('initial practice remains explicitly non-sexual',()=>assert.match(js,/Prática inicial não sexual/));
