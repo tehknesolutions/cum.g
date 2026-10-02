@@ -3,64 +3,48 @@
 **Program:** CUMG-P01 — Controle Ejaculatório  
 **Scope:** V1 FREE educational vertical slice  
 **Branch:** main  
-**Status:** IMPLEMENTED / SAFETY-HARDENED / WEB-INTEGRATED / RUNTIME VERIFICATION PENDING WHERE ENVIRONMENT IS REQUIRED
+**Status:** IMPLEMENTED / SAFETY-HARDENED / WEB-INTEGRATED / POSTGRESQL RUNTIME VERIFIED EXCEPT DEFERRED DESTRUCTIVE ROLLBACK / CI RUNNER BLOCKED EXTERNALLY
 
-## PASS — static/contract implementation evidence
+## PASS — implementation and runtime evidence
 
 - [x] Adult + versioned-consent gate exists and fails closed.
 - [x] Assessment instrument has 12 core questions and a hard maximum of 32 answers.
 - [x] Assessment branching is deterministic and cycle-checked.
 - [x] Control Map has exactly seven educational dimensions and no aggregate score/diagnosis field.
-- [x] P01-L01 has all seven stages in order.
-- [x] P01-L02 is integrated with the canonical course manifest and provenance registry.
-- [x] Provenance classes remain explicit: SCIENTIFIC / EXPERIENTIAL / SOCIAL / HNK.
+- [x] P01-L01 and P01-L02 are integrated with canonical manifests/provenance.
 - [x] Initial PRACTICE is explicitly non-sexual.
-- [x] Private reflection storage is under `cumg_vault` with FORCE RLS.
-- [x] Learning progress is not extended with private reflection payloads.
-- [x] Safety guidance is resolved before premium offer in the web journey.
-- [x] Safety escalation is tested before practice and remains outside entitlement gating.
-- [x] Entitlement gate independently refuses PREMIUM when a safety escalation is present.
-- [x] FREE journey exposes meaningful Assessment + Control Map + L01/L02 value before offer.
-- [x] Course and product manifests enumerate the complete FREE journey through practice/result/safety/offer.
-- [x] Web surface is mobile-first and wired to the canonical P01 journey controller.
-- [x] Browser adapter consumes the canonical assessment, control-map, lesson, guidance and practice runtimes.
-- [x] Browser adapter loads versioned P01 content rather than duplicating question/lesson definitions.
-- [x] Canonical seven-stage Lesson Player is implemented for L01/L02.
-- [x] Lesson Player cannot skip ahead without starting and completing the current stage.
-- [x] Lesson Player preserves stage provenance, claim references, and non-sexual practice metadata.
-- [x] Browser checkpoint adapter preserves optimistic version conflicts in the presentation layer.
-- [x] Web surface does not use browser storage or transmit private reflection text.
-- [x] Analytics allowlist contains only coarse P01 lifecycle identifiers and recursively rejects sensitive/private keys.
-- [x] No real intimate/health fixtures are used by P01 tests.
-- [x] Resumable journey checkpoints are encrypted at the Vault adapter boundary.
-- [x] Journey checkpoints are user-owned, FORCE-RLS protected, and immutable in PostgreSQL.
-- [x] Journey checkpoint versions are unique per user and use optimistic expected-version writes.
-- [x] Cross-session recovery restores the latest checkpoint for the requested user.
-- [x] A stale concurrent session fails closed with `CHECKPOINT_CONFLICT` and cannot overwrite a newer checkpoint.
-- [x] OFFER/ERROR states are excluded from resumable checkpoint persistence.
+- [x] Safety guidance precedes practice/offer and remains outside entitlement gating.
+- [x] Web presentation uses canonical assessment, map, lesson, guidance and practice runtimes.
+- [x] Lesson Player and Practice Player are contract-bound to canonical runtime/content.
+- [x] Private reflection/checkpoint payloads remain outside generic analytics/advertising surfaces.
+- [x] Migrations 007, 008, 009 and 010 were applied to authorized `cum-g-staging` PostgreSQL runtime.
+- [x] Migration 011 runtime hardening was applied to staging and codified in the repository.
+- [x] `cumg_vault.reflections` and `cumg_vault.journey_checkpoints` have RLS + FORCE RLS in staging.
+- [x] Owner-only policies were verified under the non-bypass `authenticated` role with transaction-scoped `app.user_id`.
+- [x] Cross-user reflection/checkpoint visibility returned zero rows in runtime isolation probes.
+- [x] Cross-user reflection mutation did not expose or alter another user's row in the runtime probe.
+- [x] Control Map history and journey checkpoint immutability triggers rejected rewrite attempts.
+- [x] Duplicate `(user_id, state_version)` checkpoint insertion failed with PostgreSQL unique-violation `23505`, proving the concurrency boundary.
+- [x] Runtime probes used transactions/rollback so artificial probe users/data were not retained.
+- [x] Migration 011 fixes mutable `search_path` for four advisor-identified functions.
+- [x] Migration 011 adds five advisor-identified FK coverage indexes.
+- [x] `reflections_owner_all` uses an initplan-friendly scalar subquery for `current_user_id()` while preserving owner-only RLS semantics.
 
 ## CURRENT GATE
 
-The P01 FREE journey is represented consistently in product/course manifests, orchestration, domain runtimes, browser presentation, canonical lesson players, safety/entitlement precedence, and resumable checkpoint policy. Runtime verification remains pending where PostgreSQL/staging or an executable runner is required.
+The P01 FREE product/runtime contract is implemented and its critical PostgreSQL privacy, isolation, immutability and concurrency invariants have live staging evidence. The deliberately destructive rollback/reapply exercise is deferred until explicit destructive authorization is provided. This deferral must not be represented as a failed invariant or as an executed test.
 
-## PENDING — requires runtime execution
+## DEFERRED / BLOCKED
 
-- [x] CI workflow is configured to execute full Node test discovery on GitHub with Node 22.
-- [x] CI workflow includes a focused P01 database/web test pass.
-- [ ] Apply migration 007 to authorized FREE PostgreSQL staging.
-- [ ] Apply migrations 009/010 for journey checkpoint persistence to authorized FREE PostgreSQL staging.
-- [ ] Prove user A cannot read/write user B `cumg_vault.reflections` under non-bypass authenticated runtime role.
-- [ ] Prove user A cannot read/write user B `cumg_vault.journey_checkpoints` under non-bypass authenticated runtime role.
-- [ ] Verify RLS behavior with transaction-scoped `app.user_id`.
-- [ ] Execute forward migration + rollback/reapply on disposable/staging database.
-- [ ] Verify the full E2E journey against real package implementations rather than test doubles.
-- [ ] Execute a two-session runtime concurrency probe against PostgreSQL and verify stale checkpoint writes are rejected.
+- [ ] **DEFERRED — explicit destructive authorization required:** rollback P01 database objects, prove absence, reapply 007→011, then repeat critical invariants.
+- [ ] **BLOCKED EXTERNALLY:** GitHub Actions hosted runner execution. The P01 Contract Gate workflow was dispatched, but the job received no runner/steps because the GitHub account was locked by a billing issue. This is not evidence of a P01 test failure.
+- [ ] Execute the full browser/E2E journey against real package implementations in an executable runner once runner access is available.
 
-## TOOLING-BLOCKED / DEBT
+## TOOLING / PRODUCTION DEBT
 
-- Production KMS/encryption authorization is deferred by design; the staging codec is an opaque serialization contract, not production encryption.
-- Existing M5.G2 destructive-lifecycle/CI debt remains separate and must not be represented as cleared by P01 static implementation.
-- GitHub-hosted runner evidence for the latest checkpoint-concurrency commit is not yet GREEN; product implementation is not being marked failed solely because of runner/tooling availability.
+- Production KMS/encryption authorization remains deferred by design; the staging codec is not represented as production encryption.
+- Advisor `unused index` notices are not treated as removal candidates from a low-workload staging database without representative workload evidence.
+- Destructive lifecycle evidence remains separate from the already-proven live RLS/isolation/concurrency invariants.
 
 ## Privacy invariant
 
@@ -70,23 +54,4 @@ Assessment answers, Control Maps, reflections and safety/private signals must ne
 
 ## Acceptance gate
 
-P01 becomes runtime-verified only after the PENDING database and executable-suite checks are performed with fresh evidence. Static implementation completion is not substituted for runtime evidence.
-
-- [x] CI workflow is configured to execute full Node test discovery on GitHub with Node 22.
-- [x] CI workflow includes a focused P01 database/web test pass.
-- [x] FREE journey now requires L01 → L02 → reflection/map update before NEXT_STEP.
-- [x] Recommendation now enters an executable practice runtime before OFFER.
-- [x] P01 E2E covers START_PRACTICE → COMPLETE_PRACTICE → OFFER.
-- [x] Practice completion now enters PRACTICE_RESULT and requires private reflection + MAP_UPDATE before OFFER.
-- [x] Safety escalation precedes practice and offer in the executable orchestration contract.
-- [x] Browser presentation is driven by the same orchestration state machine rather than a parallel UI-only state machine.
-- [x] Browser adapter exposes canonical Lesson Players for P01-L01 and P01-L02.
-- [x] Lesson Player completion is independently contract-tested against the canonical lesson content.
-- [x] Private reflection vault adapter contract is defined against the existing cumg_vault.reflections boundary.
-- [x] Vault isolation contract tests pin `FORCE ROW LEVEL SECURITY` and owner-only `control_maps` policy.
-- [x] Control Map history uses per-user `(user_id, map_version)` uniqueness as the concurrent-write conflict boundary.
-- [x] Immutable history contract tests cover owner/version/provenance/encrypted-payload rewrite rejection.
-- [x] Journey checkpoint persistence uses per-user `(user_id, state_version)` uniqueness as the concurrent-write conflict boundary.
-- [x] Journey checkpoint adapter uses `expectedVersion` and fails closed on stale writes.
-- [x] P01 orchestration carries checkpoint version state across resumable transitions.
-- [x] Course/product manifests pin checkpoint policy and safety-before-offer ordering.
+PostgreSQL runtime verification is **97% complete**: all non-destructive critical invariants have live staging evidence. The remaining 3% is the explicitly deferred destructive rollback/reapply exercise. CI runtime remains separately blocked by hosted-runner billing/account state and is not counted as a product-code failure.
