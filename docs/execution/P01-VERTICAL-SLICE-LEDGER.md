@@ -3,7 +3,7 @@
 **Program:** CUMG-P01 — Controle Ejaculatório  
 **Scope:** V1 FREE educational vertical slice  
 **Branch:** feat/m5-g2-database-contracts  
-**Status:** IMPLEMENTED / RUNTIME VERIFICATION PENDING WHERE ENVIRONMENT IS REQUIRED
+**Status:** IMPLEMENTED / SAFETY-HARDENED / RUNTIME VERIFICATION PENDING WHERE ENVIRONMENT IS REQUIRED
 
 ## PASS — static/contract implementation evidence
 
@@ -17,9 +17,14 @@
 - [x] Private reflection storage is under `cumg_vault` with FORCE RLS.
 - [x] Learning progress is not extended with private reflection payloads.
 - [x] Safety guidance is resolved before premium offer in the web journey.
+- [x] Entitlement gate independently refuses PREMIUM when a safety escalation is present.
 - [x] FREE journey exposes meaningful Control Map/L01 value before offer.
 - [x] Analytics allowlist contains only coarse P01 lifecycle identifiers and recursively rejects sensitive/private keys.
 - [x] No real intimate/health fixtures are used by P01 tests.
+
+## CURRENT GATE
+
+The implementation is complete for the planned P01 vertical slice. The remaining gate is executable/runtime evidence; no implementation work is being blocked by the lack of a local runner.
 
 ## PENDING — requires runtime execution
 
