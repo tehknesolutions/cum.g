@@ -12,6 +12,7 @@
 - [x] Assessment branching is deterministic and cycle-checked.
 - [x] Control Map has exactly seven educational dimensions and no aggregate score/diagnosis field.
 - [x] P01-L01 has all seven stages in order.
+- [x] P01-L02 is integrated with the canonical course manifest and provenance registry.
 - [x] Provenance classes remain explicit: SCIENTIFIC / EXPERIENTIAL / SOCIAL / HNK.
 - [x] Initial PRACTICE is explicitly non-sexual.
 - [x] Private reflection storage is under `cumg_vault` with FORCE RLS.
@@ -24,7 +25,7 @@
 
 ## CURRENT GATE
 
-The implementation is complete for the planned P01 vertical slice. The remaining gate is executable/runtime evidence; no implementation work is being blocked by the lack of a local runner.
+L01 is complete and L02 is now integrated as the next vertical-slice lesson; runtime verification remains pending. The remaining gate is executable/runtime evidence; no implementation work is being blocked by the lack of a local runner.
 
 ## PENDING — requires runtime execution
 
