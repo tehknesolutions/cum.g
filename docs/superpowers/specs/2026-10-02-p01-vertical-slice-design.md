@@ -1,7 +1,7 @@
 # CUM.G — P01 Educational Vertical Slice V1 Design
 
 **Date:** 2026-10-02  
-**Status:** DESIGN APPROVED / SPEC REVIEW REQUIRED  
+**Status:** DESIGN + SPEC APPROVED  
 **Program:** `CUMG-P01 — Controle Ejaculatório`
 
 ## 1. Intent
