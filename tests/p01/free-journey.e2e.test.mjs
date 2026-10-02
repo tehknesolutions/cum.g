@@ -18,6 +18,7 @@ const deps = {
   entitlement: { evaluate: (input) => input?.safetyDecision?.escalated ? {allowed:false,reason:'SAFETY_GATE'} : {allowed:false,reason:'PREMIUM_REQUIRED'} },
   analytics: () => {},
   practiceRuntime: { create: ({ recommendation }) => ({ status:'READY', start:()=>({status:'IN_PROGRESS'}), complete:()=>({status:'COMPLETE',targetId:recommendation.targetId}) }) },
+  controlMapHistory: { saveSnapshot: async (input) => ({ id:'map-'+input.map.version }) },
 };
 
 test('adult synthetic user completes FREE journey and receives value before offer',()=>{
@@ -37,6 +38,7 @@ test('adult synthetic user completes FREE journey and receives value before offe
   const state=j.dispatch({type:'RESOLVE_NEXT_STEP',recommendationInput:{},safetyInput:{}});
   assert.equal(state.phase,'PRACTICE');
   assert.equal(state.freeValueDelivered,true);
+  assert.equal(state.mapHistory[0].version,1);
   j.dispatch({type:'START_PRACTICE'});
   const completed=j.dispatch({type:'COMPLETE_PRACTICE',input:{completedSteps:3,reflectionRecorded:true}});
   assert.equal(completed.phase,'PRACTICE_RESULT');
@@ -46,6 +48,7 @@ test('adult synthetic user completes FREE journey and receives value before offe
   const offered=j.dispatch({type:'UPDATE_PRACTICE_MAP',controlMap:{status:'COMPLETE',dimensions:{}}});
   assert.equal(offered.phase,'OFFER');
   assert.equal(offered.offerVisible,true);
+  assert.equal(offered.mapHistory.at(-1).version,2);
   assert.equal(state.offerVisible,true);
 });
 
