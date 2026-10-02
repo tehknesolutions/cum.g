@@ -3,11 +3,12 @@ CREATE TABLE cumg_vault.journey_checkpoints (
   user_id uuid NOT NULL REFERENCES identity.users(id) ON DELETE CASCADE,
   encrypted_state bytea NOT NULL,
   state_version integer NOT NULL DEFAULT 1 CHECK (state_version >= 1),
-  created_at timestamptz NOT NULL DEFAULT now()
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT journey_checkpoints_user_version_unique UNIQUE (user_id, state_version)
 );
 
 CREATE INDEX journey_checkpoints_user_created_idx
-  ON cumg_vault.journey_checkpoints(user_id, created_at DESC);
+  ON cumg_vault.journey_checkpoints(user_id, state_version DESC, created_at DESC);
 
 ALTER TABLE cumg_vault.journey_checkpoints ENABLE ROW LEVEL SECURITY;
 ALTER TABLE cumg_vault.journey_checkpoints FORCE ROW LEVEL SECURITY;
@@ -38,4 +39,4 @@ CREATE TRIGGER journey_checkpoint_immutable
 BEFORE UPDATE ON cumg_vault.journey_checkpoints
 FOR EACH ROW EXECUTE FUNCTION cumg_vault.prevent_journey_checkpoint_update();
 
-COMMENT ON TABLE cumg_vault.journey_checkpoints IS 'Encrypted resumable P01 journey state. User-owned, immutable checkpoints; never expose to analytics or marketing.';
+COMMENT ON TABLE cumg_vault.journey_checkpoints IS 'Encrypted resumable P01 journey state. User-owned, immutable checkpoints with optimistic version ordering; never expose to analytics or marketing.';
