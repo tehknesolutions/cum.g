@@ -4,7 +4,9 @@ CUM.G is an adult media, sexual education, and training platform. The first prod
 
 ## V0.1 — Education Vertical Slice
 
-`Landing → Assessment → P01/L01 → P01/L02 → Control Map → HNK Performance Lab → Offer → Checkout → Dashboard`
+`Entry → Age Consent → Assessment → Control Map → P01/L01 → Reflection → Map Update → P01/L02 → Reflection → Map Update → Next Step → Practice → Result → Safety Guidance → Offer`
+
+The browser surface is available under `apps/web/` as a dependency-light static experience. It keeps the domain journey separate from the UI and does not persist private reflection text or offer state in browser storage.
 
 ## Architecture principles
 
@@ -13,10 +15,11 @@ CUM.G is an adult media, sexual education, and training platform. The first prod
 - Private sexual/health-related user data never enters generic analytics.
 - Content claims are traceable to sources through the Knowledge Registry.
 - Medical/safety guidance is never hidden behind a paywall.
+- Resumable journey state belongs to the private Vault boundary and uses optimistic versioning.
 
 ## Repository map
 
-- `apps/web` — product web application
+- `apps/web` — product web application and P01 browser surface
 - `packages/*` — domain packages
 - `content/courses/CUMG-P01` — first educational program
 - `assets/brand` — versioned brand assets
@@ -25,4 +28,4 @@ CUM.G is an adult media, sexual education, and training platform. The first prod
 
 ## Current milestone
 
-M5.G1 — Repository Genesis
+P01 FREE vertical slice — domain, content contracts, resumable state, and browser surface implemented; PostgreSQL/staging runtime evidence remains a separate verification gate.
