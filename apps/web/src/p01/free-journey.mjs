@@ -7,7 +7,9 @@ export function createP01FreeJourney(deps = {}) {
     assessmentState: null,
     controlMap: null,
     lessonState: null,
-    reflection: null,
+    currentLessonCode: null,
+    completedLessons: [],
+    reflections: [],
     nextStep: null,
     safetyGuidance: null,
     offerVisible: false,
@@ -46,13 +48,16 @@ export function createP01FreeJourney(deps = {}) {
               emit('assessment_completed',{assessmentId:state.assessmentState.instrumentCode,instrumentVersion:state.assessmentState.instrumentVersion});
             }
             break;
-          case 'BUILD_CONTROL_MAP':
+          case 'BUILD_CONTROL_MAP': {
             requirePhase('CONTROL_MAP');
-            state = { ...state, controlMap:controlMap.build(event.input), freeValueDelivered:true, phase:'L01' };
+            const map = controlMap.build(event.input);
+            if (map.status !== 'COMPLETE') { state = { ...state, controlMap:map }; break; }
+            state = { ...state, controlMap:map, freeValueDelivered:true, phase:'L01' };
             break;
+          }
           case 'START_L01':
             requirePhase('L01');
-            state = { ...state, lessonState:lesson.create(event.lesson), phase:'L01' };
+            state = { ...state, lessonState:lesson.create(event.lesson), currentLessonCode:'P01-L01', phase:'L01' };
             break;
           case 'ADVANCE_L01':
             requirePhase('L01');
@@ -61,11 +66,26 @@ export function createP01FreeJourney(deps = {}) {
             break;
           case 'SAVE_REFLECTION':
             requirePhase('REFLECTION');
-            state = { ...state, reflection:event.privateRecord, phase:'MAP_UPDATE' };
+            state = { ...state, reflections:[...state.reflections,{lessonCode:state.currentLessonCode,record:event.privateRecord}], phase:'MAP_UPDATE' };
             break;
           case 'UPDATE_MAP':
             requirePhase('MAP_UPDATE');
-            state = { ...state, controlMap:event.controlMap, phase:'NEXT_STEP' };
+            if (state.currentLessonCode === 'P01-L01') {
+              state = { ...state, controlMap:event.controlMap, phase:'L02' };
+            } else if (state.currentLessonCode === 'P01-L02') {
+              state = { ...state, controlMap:event.controlMap, phase:'NEXT_STEP' };
+            } else {
+              throw new Error('UNKNOWN_P01_LESSON');
+            }
+            break;
+          case 'START_L02':
+            requirePhase('L02');
+            state = { ...state, lessonState:lesson.create(event.lesson), currentLessonCode:'P01-L02', phase:'L02' };
+            break;
+          case 'ADVANCE_L02':
+            requirePhase('L02');
+            state = { ...state, lessonState:lesson.advance(state.lessonState,event.input) };
+            if (state.lessonState.status === 'COMPLETE') state = { ...state, completedLessons:[...state.completedLessons,'P01-L02'], phase:'REFLECTION' };
             break;
           case 'RESOLVE_NEXT_STEP': {
             requirePhase('NEXT_STEP');
