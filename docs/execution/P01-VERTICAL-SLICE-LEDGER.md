@@ -54,3 +54,6 @@ P01 becomes runtime-verified only after the PENDING database and executable-suit
 - [x] CI workflow is configured to execute full Node test discovery on GitHub with Node 22.
 - [x] CI workflow includes a focused P01 database/web test pass.
 - [x] Current branch has no reported status checks for the inspected commit; CI PASS is therefore not asserted.
+
+- [x] Canonical `verify.yml` supports manual dispatch and requests read-only repository permissions.
+- [x] Latest inspected main commit still has no reported GitHub workflow/status evidence; CI PASS remains unasserted.
