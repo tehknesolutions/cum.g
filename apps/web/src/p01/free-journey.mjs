@@ -62,7 +62,7 @@ export function createP01FreeJourney(deps = {}) {
           case 'ADVANCE_L01':
             requirePhase('L01');
             state = { ...state, lessonState:lesson.advance(state.lessonState,event.input) };
-            if (state.lessonState.status === 'COMPLETE') state = { ...state, phase:'REFLECTION' };
+            if (state.lessonState.status === 'COMPLETE') state = { ...state, completedLessons:[...state.completedLessons,'P01-L01'], phase:'REFLECTION' };
             break;
           case 'SAVE_REFLECTION':
             requirePhase('REFLECTION');
