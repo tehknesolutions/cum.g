@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { loadInstrument } from '../../packages/assessment/src/instrument.mjs';
 import { startAssessment, answerQuestion, nextQuestion } from '../../packages/assessment/src/session.mjs';
-import { buildControlMap } from '../../packages/control-map/src/control-map.mjs';
+import { buildControlMap, updateControlMap } from '../../packages/control-map/src/control-map.mjs';
 
 const raw = JSON.parse(await readFile(new URL('../../content/courses/CUMG-P01/assessment/control-map-v1.json', import.meta.url), 'utf8'));
 const instrument = loadInstrument(raw);
@@ -51,4 +51,20 @@ test('rejects malformed/out-of-domain private answer values', () => {
   assert.equal(map.status, 'INCOMPLETE');
   assert.ok(map.invalidQuestionCodes.includes('P01Q01'));
   assert.deepEqual(map.dimensions, {});
+});
+
+test('post-practice update creates version 2 and changes only the practiced dimension',()=>{
+  const assessmentState = completedAssessment(4);
+  const first = buildControlMap({ instrument, assessmentState, answers: assessmentState.answers });
+  const updated = updateControlMap({ previousMap:first, dimension:'selfRegulation', selfRating:100 });
+  assert.equal(updated.version,2);
+  assert.equal(updated.updateSource,'PRACTICE_FEEDBACK');
+  assert.ok(updated.dimensions.selfRegulation.value >= first.dimensions.selfRegulation.value);
+  for (const key of Object.keys(first.dimensions)) if (key !== 'selfRegulation') assert.deepEqual(updated.dimensions[key],first.dimensions[key]);
+});
+
+test('post-practice update rejects ratings outside 0-100',()=>{
+  const assessmentState = completedAssessment(4);
+  const first = buildControlMap({ instrument, assessmentState, answers: assessmentState.answers });
+  assert.throws(()=>updateControlMap({ previousMap:first, dimension:'selfRegulation', selfRating:101 }),/SELF_RATING_OUT_OF_RANGE/);
 });
