@@ -25,6 +25,9 @@
 - [x] Web surface is mobile-first and wired to the canonical P01 journey controller.
 - [x] Browser adapter consumes the canonical assessment, control-map, lesson, guidance and practice runtimes.
 - [x] Browser adapter loads versioned P01 content rather than duplicating question/lesson definitions.
+- [x] Canonical seven-stage Lesson Player is implemented for L01/L02.
+- [x] Lesson Player cannot skip ahead without starting and completing the current stage.
+- [x] Lesson Player preserves stage provenance, claim references, and non-sexual practice metadata.
 - [x] Browser checkpoint adapter preserves optimistic version conflicts in the presentation layer.
 - [x] Web surface does not use browser storage or transmit private reflection text.
 - [x] Analytics allowlist contains only coarse P01 lifecycle identifiers and recursively rejects sensitive/private keys.
@@ -38,7 +41,7 @@
 
 ## CURRENT GATE
 
-The P01 FREE journey is now represented consistently in the product manifest, canonical course manifest, orchestration, domain runtimes, browser presentation surface, safety/entitlement precedence, and resumable checkpoint policy. Runtime verification remains pending where PostgreSQL/staging or an executable runner is required.
+The P01 FREE journey is represented consistently in product/course manifests, orchestration, domain runtimes, browser presentation, canonical lesson players, safety/entitlement precedence, and resumable checkpoint policy. Runtime verification remains pending where PostgreSQL/staging or an executable runner is required.
 
 ## PENDING — requires runtime execution
 
@@ -77,6 +80,8 @@ P01 becomes runtime-verified only after the PENDING database and executable-suit
 - [x] Practice completion now enters PRACTICE_RESULT and requires private reflection + MAP_UPDATE before OFFER.
 - [x] Safety escalation precedes practice and offer in the executable orchestration contract.
 - [x] Browser presentation is driven by the same orchestration state machine rather than a parallel UI-only state machine.
+- [x] Browser adapter exposes canonical Lesson Players for P01-L01 and P01-L02.
+- [x] Lesson Player completion is independently contract-tested against the canonical lesson content.
 - [x] Private reflection vault adapter contract is defined against the existing cumg_vault.reflections boundary.
 - [x] Vault isolation contract tests pin `FORCE ROW LEVEL SECURITY` and owner-only `control_maps` policy.
 - [x] Control Map history uses per-user `(user_id, map_version)` uniqueness as the concurrent-write conflict boundary.
