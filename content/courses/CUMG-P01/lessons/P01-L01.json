@@ -1,0 +1,14 @@
+{
+  "lessonCode": "P01-L01",
+  "version": "1.0.0",
+  "titleKey": "P01.L01.TITLE",
+  "blocks": [
+    {"id":"L01-LEARN","stage":"LEARN","provenanceClass":"SCIENTIFIC","contentKey":"P01.L01.LEARN.RESPONSE_VARIABILITY","claimRefs":["P01-CLAIM-RESPONSE-VARIABILITY"]},
+    {"id":"L01-OBSERVE","stage":"OBSERVE","provenanceClass":"EXPERIENTIAL","contentKey":"P01.L01.OBSERVE.PATTERNS","claimRefs":[]},
+    {"id":"L01-PRACTICE","stage":"PRACTICE","provenanceClass":"HNK","contentKey":"P01.L01.PRACTICE.NEUTRAL_BODY_ATTENTION","claimRefs":[],"nonSexual":true,"instructions":["NOTICE_BREATH_WITHOUT_FORCING","NOTICE_BODY_TENSION","RETURN_ATTENTION_GENTLY"]},
+    {"id":"L01-RECORD","stage":"RECORD","provenanceClass":"SCIENTIFIC","contentKey":"P01.L01.RECORD.SELF_OBSERVATION","claimRefs":["P01-CLAIM-SELF-REPORT-CONTEXT"]},
+    {"id":"L01-REFLECT","stage":"REFLECT","provenanceClass":"HNK","contentKey":"P01.L01.REFLECT.ATTENTION","claimRefs":[]},
+    {"id":"L01-COMPARE","stage":"COMPARE","provenanceClass":"SOCIAL","contentKey":"P01.L01.COMPARE.EXPECTATIONS_VS_EXPERIENCE","claimRefs":[]},
+    {"id":"L01-ADVANCE","stage":"ADVANCE","provenanceClass":"SCIENTIFIC","contentKey":"P01.L01.ADVANCE.NEXT_EDUCATIONAL_STEP","claimRefs":["P01-CLAIM-EDUCATION-NOT-DIAGNOSIS"]}
+  ]
+}
