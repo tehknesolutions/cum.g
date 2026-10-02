@@ -1,6 +1,6 @@
 export function createP01FreeJourney(deps = {}) {
-  const { consentGate, assessment, controlMap, lesson, safety, recommendation, entitlement, analytics } = deps;
-  if (!consentGate || !assessment || !controlMap || !lesson || !safety || !recommendation || !entitlement) throw new Error('P01_DEPENDENCIES_REQUIRED');
+  const { consentGate, assessment, controlMap, lesson, safety, recommendation, entitlement, practiceRuntime, analytics } = deps;
+  if (!consentGate || !assessment || !controlMap || !lesson || !safety || !recommendation || !entitlement || !practiceRuntime) throw new Error('P01_DEPENDENCIES_REQUIRED');
 
   let state = {
     phase: 'ENTRY',
@@ -14,6 +14,7 @@ export function createP01FreeJourney(deps = {}) {
     safetyGuidance: null,
     offerVisible: false,
     offerAccess: null,
+    practiceState: null,
     freeValueDelivered: false,
     error: null,
   };
@@ -94,7 +95,18 @@ export function createP01FreeJourney(deps = {}) {
               state = { ...state, safetyGuidance:safetyResult, phase:'SAFETY_GUIDANCE', freeValueDelivered:true };
               break;
             }
-            state = { ...state, nextStep:recommendation.next({ controlMap: state.controlMap, safetyDecision: safetyResult, ...(event.recommendationInput ?? {}) }), phase:'OFFER', offerVisible:true };
+            const next = recommendation.next({ controlMap: state.controlMap, safetyDecision: safetyResult, ...(event.recommendationInput ?? {}) });
+            const runtime = practiceRuntime.create({ recommendation: next, safetyDecision: safetyResult });
+            state = { ...state, nextStep:next, practiceState:runtime, phase:'PRACTICE', offerVisible:false };
+            break;
+          }
+          case 'START_PRACTICE':
+            requirePhase('PRACTICE');
+            state = { ...state, practiceState:state.practiceState.start(), phase:'PRACTICE' };
+            break;
+          case 'COMPLETE_PRACTICE':
+            requirePhase('PRACTICE');
+            state = { ...state, practiceState:state.practiceState.complete(event.input ?? {}), phase:'OFFER', offerVisible:true };
             break;
           }
           case 'VIEW_OFFER': {
