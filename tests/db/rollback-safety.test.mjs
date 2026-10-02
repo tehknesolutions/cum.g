@@ -52,3 +52,18 @@ test('legacy rollback peers clean their own grants/policies before their owning 
   assert.match(r005,/drop policy if exists assessments_owner_all/);
   assert.match(r005,/drop function if exists cumg_vault.current_user_id/);
 });
+
+test('P01 forward migration is explicitly re-runnable', async()=>{
+  const sql=await readFile(new URL('../../packages/db/migrations/007_p01_vertical_slice.sql',import.meta.url),'utf8');
+  assert.match(sql,/add column if not exists age_18_confirmed/i);
+  assert.match(sql,/create index if not exists consent_receipts_user_type_version_idx/i);
+  assert.match(sql,/create table if not exists cumg_vault\\.reflections/i);
+  assert.match(sql,/create index if not exists reflections_user_lesson_idx/i);
+  assert.match(sql,/from pg_policies/i);
+  assert.match(sql,/create policy reflections_owner_all/i);
+});
+
+test('P01 seed is re-runnable by conflict-safe inserts', async()=>{
+  const sql=await readFile(new URL('../../packages/db/migrations/006_seed_p01.sql',import.meta.url),'utf8');
+  assert.equal((sql.match(/on conflict \\(id\\) do nothing/gi)||[]).length,3);
+});
