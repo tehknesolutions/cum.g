@@ -11,11 +11,15 @@ export function createP01FreeJourney(deps = {}) {
     nextStep: null,
     safetyGuidance: null,
     offerVisible: false,
+    offerAccess: null,
     freeValueDelivered: false,
     error: null,
   };
 
   const emit = (name, input) => analytics?.(name, input);
+  const requirePhase = (phase) => {
+    if (state.phase !== phase) throw new Error(`INVALID_P01_PHASE:${phase}`);
+  };
 
   return {
     getState: () => structuredClone(state),
@@ -23,6 +27,7 @@ export function createP01FreeJourney(deps = {}) {
       try {
         switch (event.type) {
           case 'CONFIRM_ADULT_CONSENT': {
+            requirePhase('ENTRY');
             const decision = consentGate(event.input);
             if (!decision.allowed) { state = { ...state, phase:'BLOCKED', error:decision.reason }; break; }
             state = { ...state, phase:'ASSESSMENT', error:null };
@@ -30,9 +35,11 @@ export function createP01FreeJourney(deps = {}) {
             break;
           }
           case 'START_ASSESSMENT':
+            requirePhase('ASSESSMENT');
             state = { ...state, assessmentState: assessment.start(event.input), phase:'ASSESSMENT' };
             break;
           case 'ANSWER_ASSESSMENT':
+            requirePhase('ASSESSMENT');
             state = { ...state, assessmentState: assessment.answer(state.assessmentState,event.input) };
             if (state.assessmentState.status === 'COMPLETE') {
               state = { ...state, phase:'CONTROL_MAP' };
@@ -40,22 +47,28 @@ export function createP01FreeJourney(deps = {}) {
             }
             break;
           case 'BUILD_CONTROL_MAP':
+            requirePhase('CONTROL_MAP');
             state = { ...state, controlMap:controlMap.build(event.input), freeValueDelivered:true, phase:'L01' };
             break;
           case 'START_L01':
+            requirePhase('L01');
             state = { ...state, lessonState:lesson.create(event.lesson), phase:'L01' };
             break;
           case 'ADVANCE_L01':
+            requirePhase('L01');
             state = { ...state, lessonState:lesson.advance(state.lessonState,event.input) };
             if (state.lessonState.status === 'COMPLETE') state = { ...state, phase:'REFLECTION' };
             break;
           case 'SAVE_REFLECTION':
+            requirePhase('REFLECTION');
             state = { ...state, reflection:event.privateRecord, phase:'MAP_UPDATE' };
             break;
           case 'UPDATE_MAP':
+            requirePhase('MAP_UPDATE');
             state = { ...state, controlMap:event.controlMap, phase:'NEXT_STEP' };
             break;
           case 'RESOLVE_NEXT_STEP': {
+            requirePhase('NEXT_STEP');
             const safetyResult = safety.evaluate(event.safetyInput ?? {});
             if (safetyResult.escalated) {
               state = { ...state, safetyGuidance:safetyResult, phase:'SAFETY_GUIDANCE', freeValueDelivered:true };
@@ -65,8 +78,12 @@ export function createP01FreeJourney(deps = {}) {
             break;
           }
           case 'VIEW_OFFER': {
-            const access=entitlement.evaluate(event.entitlementInput);
-            state={...state,offerVisible:true,offerAccess:access,phase:'OFFER'};
+            if (state.phase !== 'OFFER') {
+              if (state.phase === 'SAFETY_GUIDANCE') break;
+              throw new Error('INVALID_P01_PHASE:OFFER');
+            }
+            const access=entitlement.evaluate({...event.entitlementInput, safetyDecision:state.safetyGuidance});
+            state={...state,offerVisible:access.allowed || event.showOffer === true,offerAccess:access,phase:'OFFER'};
             break;
           }
           default: throw new Error('UNKNOWN_P01_EVENT');
