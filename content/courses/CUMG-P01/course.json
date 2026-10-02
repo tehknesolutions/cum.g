@@ -10,7 +10,8 @@
   ],
   "medicalSafetyBehindPaywall": false,
   "verticalSliceLessons": [
-    "L01"
+    "P01-L01",
+    "P01-L02"
   ],
   "instruments": [
     "CUMG-P01-CONTROL-MAP"
