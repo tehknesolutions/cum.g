@@ -18,3 +18,5 @@ jobs:
           version: 10.17.1
       - name: Run repository contracts
         run: pnpm test
+      - name: Run P01 focused suite
+        run: pnpm test:p01
