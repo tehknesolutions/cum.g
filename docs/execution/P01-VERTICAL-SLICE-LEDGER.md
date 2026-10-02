@@ -50,3 +50,7 @@ Assessment answers, Control Maps, reflections and safety/private signals must ne
 ## Acceptance gate
 
 P01 becomes runtime-verified only after the PENDING database and executable-suite checks are performed with fresh evidence. Static implementation completion is not substituted for runtime evidence.
+
+- [x] CI workflow is configured to execute full Node test discovery on GitHub with Node 22.
+- [x] CI workflow includes a focused P01 database/web test pass.
+- [x] Current branch has no reported status checks for the inspected commit; CI PASS is therefore not asserted.
