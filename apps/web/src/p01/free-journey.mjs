@@ -94,7 +94,7 @@ export function createP01FreeJourney(deps = {}) {
               state = { ...state, safetyGuidance:safetyResult, phase:'SAFETY_GUIDANCE', freeValueDelivered:true };
               break;
             }
-            state = { ...state, nextStep:recommendation.next(event.recommendationInput ?? {}), phase:'OFFER', offerVisible:true };
+            state = { ...state, nextStep:recommendation.next({ controlMap: state.controlMap, safetyDecision: safetyResult, ...(event.recommendationInput ?? {}) }), phase:'OFFER', offerVisible:true };
             break;
           }
           case 'VIEW_OFFER': {
