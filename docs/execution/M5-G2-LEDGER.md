@@ -1,65 +1,64 @@
 # M5.G2 — Database Contracts Verification Ledger
 
-Status: IMPLEMENTED / RUNTIME VERIFICATION PENDING
-Date: 2026-10-01
+Status: VERIFIED EXCEPT DESTRUCTIVE LIFECYCLE GATE
+Date: 2026-10-02
 Branch: `feat/m5-g2-database-contracts`
+Staging: Supabase FREE `cum-g-staging` (`sa-east-1`)
 
 ## Implemented artifacts
 
 - `001_identity.sql` + rollback
 - `002_knowledge.sql` + rollback
 - `003_learning.sql` + rollback
-- `004_vault.sql` + rollback
+- `004_vault.sql` using the CUM.G-owned `cumg_vault` namespace + rollback
 - `005_vault_rls.sql` + rollback
+- `005b_vault_runtime_grants.sql` + rollback
 - `006_seed_p01.sql` + rollback
 - fail-closed analytics event contract
 - static Node contract tests for Identity, Knowledge, Learning, Vault, RLS, Analytics, P01 seed and migration lifecycle
 
-## Repository evidence captured
+## Runtime evidence
 
-The branch tree confirms all six numbered forward migrations and all six matching rollback files are present, together with the database README, specification and implementation plan.
+### PASS — forward migrations
 
-## Verification classification
+PostgreSQL staging accepted the forward chain through Identity, Knowledge, Learning, `cumg_vault`, RLS and `CUMG-P01` seed. The original `vault` namespace collided with a Supabase-owned schema (`supabase_admin`, no CREATE privilege for the migration executor); the CUM.G domain was therefore renamed to `cumg_vault` rather than modifying Supabase system ownership or grants.
 
-### VERIFIED BY REPOSITORY INSPECTION
+### PASS — RLS A/B isolation
 
-- Four domain boundaries are represented: `identity`, `knowledge`, `learning`, `vault`.
-- Provenance values are explicitly represented in the Knowledge migration.
-- Vault private payload fields are designed as opaque `bytea` values.
-- RLS migration exists separately from Vault table creation.
-- Analytics contract is fail-closed by explicit event/property allowlists.
-- `CUMG-P01` seed is structural Learning data and contains no user fixture inserts.
-- Every numbered forward migration 001–006 has a rollback peer.
+Runtime testing was repeated under the Supabase `authenticated` role, which has `rolbypassrls = false`. Minimal runtime grants were added separately in `005b_vault_runtime_grants.sql`. With `app.user_id` bound to user A, A saw only A's assessment. With the identity bound to user B, an attempted update of A's assessment affected zero rows. Test fixtures were transaction-scoped and rolled back.
 
-### NOT YET RUNTIME-VERIFIED
+### PASS — scientific provenance constraint
 
-The following claims MUST NOT be marked PASS until fresh commands execute successfully:
+A negative runtime case attempted to approve a `SCIENTIFIC` claim without approved scientific evidence and was rejected by the deferred constraint trigger. A positive case created Source → approved SCIENTIFIC Evidence → Claim/Evidence link and then promoted the claim to `SCIENTIFIC / APPROVED` successfully. Fixtures were rolled back. PostgreSQL runtime verification uses `SET CONSTRAINTS ALL IMMEDIATE` to force the deferred trigger within the test transaction.
 
-- Node test suite returns zero failures.
-- PostgreSQL 16+ applies migrations 001–006 successfully.
-- Scientific-claim trigger behaves correctly in PostgreSQL.
-- User A cannot read/write User B Vault data under RLS.
-- Response authorization through assessment ownership behaves correctly.
-- Reverse rollback 006→001 succeeds without partial schemas.
+### PASS — privacy architecture evidence
 
-## Current blocker
+Private assessment/training payloads remain opaque `bytea` fields in `cumg_vault`. Generic analytics remains fail-closed by explicit event/property allowlists and recursively rejects private/sensitive keys. `CUMG-P01` seed contains structural Learning data only and no real user/intimate fixtures.
 
-GitHub Actions runner provisioning remains blocked before the first workflow step (Issue #4). Previous runs therefore do not constitute application-test evidence.
+## Remaining verification debt
 
-## FREE-FIRST runtime gate
+### TOOLING-BLOCKED — destructive lifecycle gate
 
-Use free infrastructure only for this verification gate: local PostgreSQL or an approved free-tier staging PostgreSQL. Do not purchase hosting solely to close M5.G2.
+The requested full rollback (`006 → 001`, including schema drops), absence check and clean re-apply was submitted only against the dedicated FREE staging project with no real user data. The connected execution layer blocked the destructive SQL before it reached PostgreSQL. Therefore no destructive lifecycle PASS is claimed and staging was left intact.
 
-No real sexual/health/intimate user data may be used in verification fixtures.
+This is classified as a tooling limitation, not a PostgreSQL migration failure. It must be re-run later from an authorized disposable runner/database capable of destructive DDL.
 
-## Exit criteria for M5.G2 = DONE
+### CI / Node runner
 
-1. Execute the full Node contract suite fresh and record command/output with zero failures.
-2. Apply migrations 001→006 to PostgreSQL 16+.
-3. Execute cross-user A/B RLS tests and prove denial in both read/write directions.
-4. Exercise scientific provenance constraint with positive and negative cases.
-5. Roll back 006→001 and verify CUM.G schemas are removed cleanly.
-6. Re-apply migrations to prove forward recovery.
-7. Record runtime evidence here.
+GitHub Actions runner provisioning remains tracked separately in Issue #4. A fresh full Node suite result must be captured when that runner path is restored or replaced.
 
-Until those seven checks have fresh execution evidence, M5.G2 remains `IMPLEMENTED / RUNTIME VERIFICATION PENDING`, not `DONE`.
+## FREE-FIRST decision
+
+No paid infrastructure is required to continue. Supabase FREE staging is sufficient for the verified runtime gates. Do not purchase hosting solely to clear the remaining destructive lifecycle verification debt.
+
+## Current milestone disposition
+
+M5.G2 is accepted for roadmap continuation as `VERIFIED EXCEPT DESTRUCTIVE LIFECYCLE GATE`.
+
+It MUST NOT be represented as fully `DONE` until:
+
+1. rollback removes the CUM.G-owned schemas cleanly on a disposable database;
+2. the forward chain re-applies cleanly afterward; and
+3. a fresh full Node contract suite records zero failures.
+
+No production deployment or real intimate user data is authorized by this milestone.
