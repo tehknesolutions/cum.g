@@ -1,9 +1,13 @@
 name: verify
 
 on:
+  workflow_dispatch:
   push:
     branches: [main, 'feat/**']
   pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -20,3 +24,5 @@ jobs:
         run: pnpm test
       - name: Run P01 focused suite
         run: pnpm test:p01
+      - name: Verify repository status
+        run: git status --short
