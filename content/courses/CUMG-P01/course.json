@@ -2,20 +2,10 @@
   "id": "CUMG-P01",
   "title": "Controle Ejaculatório",
   "status": "PILOT",
-  "provenanceClasses": [
-    "SCIENTIFIC",
-    "EXPERIENTIAL",
-    "SOCIAL",
-    "HNK"
-  ],
+  "provenanceClasses": ["SCIENTIFIC", "EXPERIENTIAL", "SOCIAL", "HNK"],
   "medicalSafetyBehindPaywall": false,
-  "verticalSliceLessons": [
-    "P01-L01",
-    "P01-L02"
-  ],
-  "instruments": [
-    "CUMG-P01-CONTROL-MAP"
-  ],
+  "verticalSliceLessons": ["P01-L01", "P01-L02"],
+  "instruments": ["CUMG-P01-CONTROL-MAP"],
   "freeJourney": [
     "AGE_CONSENT",
     "ASSESSMENT",
@@ -23,8 +13,20 @@
     "P01-L01",
     "REFLECTION",
     "MAP_UPDATE",
+    "P01-L02",
+    "REFLECTION",
+    "MAP_UPDATE",
     "NEXT_STEP",
+    "PRACTICE",
+    "PRACTICE_RESULT",
+    "MAP_UPDATE",
+    "SAFETY_GUIDANCE",
     "OFFER"
   ],
+  "checkpointPolicy": {
+    "persistResumableStates": true,
+    "persistOfferState": false,
+    "optimisticVersioning": true
+  },
   "premiumDeferred": true
 }
