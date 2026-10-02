@@ -106,9 +106,17 @@ export function createP01FreeJourney(deps = {}) {
             break;
           case 'COMPLETE_PRACTICE':
             requirePhase('PRACTICE');
-            state = { ...state, practiceState:state.practiceState.complete(event.input ?? {}), phase:'OFFER', offerVisible:true };
+            state = { ...state, practiceState:state.practiceState.complete(event.input ?? {}), phase:'PRACTICE_RESULT', offerVisible:false };
             break;
           }
+          case 'SAVE_PRACTICE_RESULT':
+            requirePhase('PRACTICE_RESULT');
+            state = { ...state, reflections:[...state.reflections,{lessonCode:'PRACTICE',record:event.privateRecord}], phase:'MAP_UPDATE' };
+            break;
+          case 'UPDATE_PRACTICE_MAP':
+            requirePhase('MAP_UPDATE');
+            state = { ...state, controlMap:event.controlMap, phase:'OFFER', offerVisible:true };
+            break;
           case 'VIEW_OFFER': {
             if (state.phase !== 'OFFER') {
               if (state.phase === 'SAFETY_GUIDANCE') break;
