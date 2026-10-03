@@ -46,13 +46,13 @@ test('rollback grant and seed peers reverse their forward ownership', async () =
 
 test('P01 reflection table has an explicit runtime grant matching its RLS boundary', async () => {
   const migration=await text(new URL('../../packages/db/migrations/007_p01_vertical_slice.sql', import.meta.url));
-  assert.match(migration,/grant select, insert, update, delete on cumg_vault\\.reflections to authenticated/);
-  assert.match(migration,/alter table cumg_vault\\.reflections force row level security/);
+  assert.match(migration,/grant select, insert, update, delete on cumg_vault\.reflections to authenticated/);
+  assert.match(migration,/alter table cumg_vault\.reflections force row level security/);
 });
 
 test('migration 002 knowledge precedes learning claim foreign keys', async () => {
   const knowledge=await text(new URL('../../packages/db/migrations/002_knowledge.sql', import.meta.url));
   const learning=await text(new URL('../../packages/db/migrations/003_learning.sql', import.meta.url));
-  assert.match(knowledge,/create table knowledge\\.claims/);
-  assert.match(learning,/references knowledge\\.claims/);
+  assert.match(knowledge,/create table knowledge\.claims/);
+  assert.match(learning,/references knowledge\.claims/);
 });
