@@ -19,7 +19,7 @@ test('P01 identity boundary combines baseline versioned consent with explicit ad
 
 test('private reflections remain opaque inside cumg_vault with forced RLS', async () => {
   const sql = (await readFile(migration, 'utf8')).toLowerCase();
-  assert.match(sql, /create table cumg_vault\.reflections/);
+  assert.match(sql, /create table if not exists cumg_vault\.reflections/);
   assert.match(sql, /user_id uuid not null/);
   assert.match(sql, /encrypted_payload bytea not null/);
   assert.match(sql, /enable row level security/);
